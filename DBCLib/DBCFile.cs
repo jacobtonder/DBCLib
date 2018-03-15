@@ -24,9 +24,9 @@ namespace DBCLib
             string path = FilePath;
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                byte[] byteSignature = reader.ReadBytes(4);
+                byte[] byteSignature = reader.ReadBytes(Signatures.WDBC.Length);
                 string stringSignature = Encoding.UTF8.GetString(byteSignature);
-                if (stringSignature != "WDBC")
+                if (stringSignature != Signatures.WDBC)
                     throw new InvalidSignatureException(stringSignature);
             }
 
