@@ -1,4 +1,6 @@
-﻿namespace DBCLib
+﻿using System.IO;
+
+namespace DBCLib
 {
     public class DBCFile
     {
@@ -11,14 +13,28 @@
             IsLoaded = false;
         }
 
-        public void LoadData()
+        public void LoadDBC()
         {
+            // We don't need to load the file multiple times.
             if (IsLoaded)
                 return;
 
-            IsLoaded = true;
+            string path = FilePath;
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
+            {
 
-            return;
+            }
+
+            // Todo: Load the DBC file
+
+            IsLoaded = true;
+        }
+
+        public void SaveDBC()
+        {
+            string path = FilePath;
+
+            // Todo: Save the DBC file
         }
     }
 }
