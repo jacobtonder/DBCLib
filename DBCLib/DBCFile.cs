@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Text;
+using DBCLib.Exceptions;
 
 namespace DBCLib
 {
@@ -22,7 +24,10 @@ namespace DBCLib
             string path = FilePath;
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-
+                byte[] byteSignature = reader.ReadBytes(4);
+                string stringSignature = Encoding.UTF8.GetString(byteSignature);
+                if (stringSignature != "WDBC")
+                    throw new InvalidSignatureException(stringSignature);
             }
 
             // Todo: Load the DBC file
