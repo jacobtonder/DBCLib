@@ -7,11 +7,13 @@ namespace DBCLib
     public class DBCFile
     {
         public string FilePath { get; }
+        public string Signature { get; }
         public bool IsLoaded { get; private set; }
 
-        public DBCFile(string path)
+        public DBCFile(string path, string signature)
         {
             FilePath = path;
+            Signature = signature;
             IsLoaded = false;
         }
 
@@ -24,9 +26,9 @@ namespace DBCLib
             string path = FilePath;
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                byte[] byteSignature = reader.ReadBytes(Signatures.WDBC.Length);
+                byte[] byteSignature = reader.ReadBytes(Signature.Length);
                 string stringSignature = Encoding.UTF8.GetString(byteSignature);
-                if (stringSignature != Signatures.WDBC)
+                if (stringSignature != Signature)
                     throw new InvalidSignatureException(stringSignature);
             }
 
