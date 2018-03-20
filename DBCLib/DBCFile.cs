@@ -6,7 +6,7 @@ using DBCLib.Exceptions;
 
 namespace DBCLib
 {
-    public class DBCFile<T> where T : new()
+    public class DBCFile<T> where T : class, new()
     {
         public string FilePath { get; }
         public string Signature { get; }
