@@ -3,7 +3,7 @@
     public class LocalizedString
     {
         // Size of Localized Strings
-        public static readonly uint Size = 16;
+        public static readonly int Size = 17;
         public string String { get; set; }
 
         public LocalizedString(string s)

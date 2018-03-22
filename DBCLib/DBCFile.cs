@@ -26,6 +26,43 @@ namespace DBCLib
         public uint LocaleFlag { get; private set; }
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
 
+        private static int FieldCount(FieldInfo[] fields, Type type)
+        {
+            Object dbcObject = Activator.CreateInstance(type);
+            int fieldCount = 0;
+            foreach (FieldInfo field in fields)
+            {
+                if (Type.GetTypeCode(field.FieldType) == TypeCode.Object)
+                {
+                    if (field.FieldType == typeof(LocalizedString))
+                    {
+                        fieldCount += LocalizedString.Size;
+                    }
+                    else if (field.FieldType.IsArray)
+                    {
+                        switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                        {
+                            case TypeCode.Int32:
+                                fieldCount += ((int[])field.GetValue(dbcObject)).Length;
+                                break;
+                            case TypeCode.UInt32:
+                                fieldCount += ((uint[])field.GetValue(dbcObject)).Length;
+                                break;
+                            case TypeCode.Single:
+                                fieldCount += ((float[])field.GetValue(dbcObject)).Length;
+                                break;
+                            default:
+                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
+                        }
+                    }
+                }
+                else
+                    ++fieldCount;
+            }
+
+            return fieldCount;
+        }
+
         public void LoadDBC()
         {
             // We don't need to load the file multiple times.
@@ -67,6 +104,11 @@ namespace DBCLib
                 // Reset position to base position
                 reader.BaseStream.Position = basePosition;
 
+                // Validate the fields
+                int fieldCounts = FieldCount(fields, DBCType);
+                if (dbcFields != fieldCounts)
+                    throw new InvalidDBCFields(DBCType.ToString());
+
                 // Loop through all of the records in the DBC file
                 for (uint i = 0; i < dbcRecords; ++i)
                 {
@@ -81,7 +123,7 @@ namespace DBCLib
                                 if (field.FieldType == typeof(LocalizedString))
                                 {
                                     string value = "";
-                                    for (uint j = 0; j < LocalizedString.Size; ++j)
+                                    for (uint j = 0; j < LocalizedString.Size - 1; ++j)
                                     {
                                         int offsetKey = reader.ReadInt32();
                                         if (value == "" && offsetKey != 0 && stringTable.TryGetValue(offsetKey, out string stringFromTable))
