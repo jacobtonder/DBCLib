@@ -135,7 +135,7 @@ namespace DBCLib
                                             field.SetValue(dbcObject, array);
                                             break;
                                         default:
-                                            throw new NotImplementedException();
+                                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
                                     }
                                 }
                                 break;
@@ -172,7 +172,7 @@ namespace DBCLib
                                 break;
                             }
                             default:
-                                throw new NotImplementedException();
+                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
                         }
                     }
 
