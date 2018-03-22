@@ -104,7 +104,7 @@ namespace DBCLib
                 // Reset position to base position
                 reader.BaseStream.Position = basePosition;
 
-                // Validate the fields
+                // Validate the dbc fields
                 int fieldCounts = FieldCount(fields, DBCType);
                 if (dbcFields != fieldCounts)
                     throw new InvalidDBCFields(DBCType.ToString());
