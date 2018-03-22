@@ -23,6 +23,7 @@ namespace DBCLib
         public string Signature { get; }
         public Type DBCType { get; }
         public bool IsLoaded { get; private set; }
+        public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
 
         public void LoadDBC()
         {
