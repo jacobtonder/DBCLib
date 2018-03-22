@@ -170,10 +170,10 @@ namespace DBCLib
                         }
                     }
 
-                    // Get the first value of the dbc file and use that as id for the dbc record
+                    // Get the first value of the dbc file and use that as key for the dbc record
                     Object firstValue = fields[0].GetValue(dbcObject);
-                    uint id = (uint)Convert.ChangeType(firstValue, typeof(uint));
-                    records.Add(id, (T)dbcObject);
+                    uint key = (uint)Convert.ChangeType(firstValue, typeof(uint));
+                    records.Add(key, (T)dbcObject);
                 }
             }
 
