@@ -46,8 +46,11 @@ namespace DBCLib
                 uint recordSize = reader.ReadUInt32();
                 uint stringSize = reader.ReadUInt32();
 
+                // We dont need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
+                long basePosition = reader.BaseStream.Position;
+
                 // Set position of reader
-                reader.BaseStream.Position = dbcRecords * recordSize + 20;
+                reader.BaseStream.Position = dbcRecords * recordSize + basePosition;
 
                 byte[] stringData = reader.ReadBytes((int)stringSize);
                 string fullString = Encoding.UTF8.GetString(stringData);
@@ -61,8 +64,8 @@ namespace DBCLib
                     currentPosition += Encoding.UTF8.GetByteCount(s) + 1;
                 }
 
-                // Reset position
-                reader.BaseStream.Position = 20;
+                // Reset position to base position
+                reader.BaseStream.Position = basePosition;
 
                 // Loop through all of the records in the DBC file
                 for (uint i = 0; i < dbcRecords; ++i)
