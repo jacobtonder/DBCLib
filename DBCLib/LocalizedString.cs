@@ -15,5 +15,10 @@
         {
             return new LocalizedString(s);
         }
+
+        public static implicit operator string(LocalizedString s)
+        {
+            return s.String;
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace DBCLib
         public string Signature { get; }
         public Type DBCType { get; }
         public bool IsLoaded { get; private set; }
+        public uint LocaleFlag { get; private set; }
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
 
         public void LoadDBC()
@@ -60,11 +61,13 @@ namespace DBCLib
                     currentPosition += Encoding.UTF8.GetByteCount(s) + 1;
                 }
 
+                // Reset position
+                reader.BaseStream.Position = 20;
+
                 // Loop through all of the records in the DBC file
                 for (uint i = 0; i < dbcRecords; ++i)
                 {
                     Object dbcObject = Activator.CreateInstance(DBCType);
-                    long positionStart = reader.BaseStream.Position;
 
                     foreach (FieldInfo field in fields)
                     {
@@ -83,6 +86,8 @@ namespace DBCLib
                                             value = stringFromTable;
                                         }
                                     }
+
+                                    LocaleFlag = reader.ReadUInt32();
 
                                     field.SetValue(dbcObject, (LocalizedString)value);
                                 }
