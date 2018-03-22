@@ -183,6 +183,7 @@ namespace DBCLib
                 }
             }
 
+            // Set IsLoaded to true to avoid loading the dbc file multiple times
             IsLoaded = true;
         }
 
