@@ -90,7 +90,7 @@ namespace DBCLib
                 );
 
                 // Read the DBC File
-                Read(reader, info);
+                ReadDBC(reader, info);
             }
 
             // Set IsLoaded to true to avoid loading the dbc file multiple times
@@ -101,10 +101,10 @@ namespace DBCLib
         {
             string path = FilePath;
 
-            // Todo: Save the DBC file
+            WriteDBC();
         }
 
-        private void Read(BinaryReader reader, DBCInfo info)
+        private void ReadDBC(BinaryReader reader, DBCInfo info)
         {
             if (reader == null)
                 return;
@@ -253,6 +253,11 @@ namespace DBCLib
                 uint key = (uint)Convert.ChangeType(firstValue, typeof(uint));
                 records.Add(key, (T)instance);
             }
+        }
+
+        private void WriteDBC()
+        {
+            throw new NotImplementedException();
         }
     }
 }
