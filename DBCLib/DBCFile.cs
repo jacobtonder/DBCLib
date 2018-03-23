@@ -13,6 +13,12 @@ namespace DBCLib
 
         public DBCFile(string path, string signature)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(path));
+
+            if (string.IsNullOrEmpty(signature))
+                throw new ArgumentNullException(nameof(signature));
+
             FilePath = path;
             Signature = signature;
             DBCType = typeof(T);
