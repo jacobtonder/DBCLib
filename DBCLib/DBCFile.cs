@@ -116,10 +116,10 @@ namespace DBCLib
                 throw new InvalidDBCFields(DBCType.ToString());
 
             // We dont need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
-            long basePosition = reader.BaseStream.Position;
+            long headerSize = reader.BaseStream.Position;
 
             // Set position of reader
-            reader.BaseStream.Position = info.DBCRecords * info.RecordSize + basePosition;
+            reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
 
             byte[] stringData = reader.ReadBytes((int)info.StringSize);
             string fullString = Encoding.UTF8.GetString(stringData);
@@ -134,7 +134,7 @@ namespace DBCLib
             }
 
             // Reset position to base position
-            reader.BaseStream.Position = basePosition;
+            reader.BaseStream.Position = headerSize;
 
             // Loop through all of the records in the DBC file
             for (uint i = 0; i < info.DBCRecords; ++i)
