@@ -28,7 +28,7 @@ namespace DBCLib
 
         private static int FieldCount(FieldInfo[] fields, Type type)
         {
-            Object dbcObject = Activator.CreateInstance(type);
+            Object instance = Activator.CreateInstance(type);
             int fieldCount = 0;
             foreach (FieldInfo field in fields)
             {
@@ -43,13 +43,13 @@ namespace DBCLib
                         switch (Type.GetTypeCode(field.FieldType.GetElementType()))
                         {
                             case TypeCode.Int32:
-                                fieldCount += ((int[])field.GetValue(dbcObject)).Length;
+                                fieldCount += ((int[])field.GetValue(instance)).Length;
                                 break;
                             case TypeCode.UInt32:
-                                fieldCount += ((uint[])field.GetValue(dbcObject)).Length;
+                                fieldCount += ((uint[])field.GetValue(instance)).Length;
                                 break;
                             case TypeCode.Single:
-                                fieldCount += ((float[])field.GetValue(dbcObject)).Length;
+                                fieldCount += ((float[])field.GetValue(instance)).Length;
                                 break;
                             default:
                                 throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
@@ -76,156 +76,15 @@ namespace DBCLib
                 if (stringSignature != Signature)
                     throw new InvalidSignatureException(stringSignature);
 
-                FieldInfo[] fields = DBCType.GetFields();
+                DBCInfo info = new DBCInfo(
+                    reader.ReadUInt32(), // DBC Records
+                    reader.ReadUInt32(), // DBC Fields
+                    reader.ReadUInt32(), // Record Size
+                    reader.ReadUInt32()  // String Size
+                );
 
-                uint dbcRecords = reader.ReadUInt32();
-                uint dbcFields = reader.ReadUInt32();
-                uint recordSize = reader.ReadUInt32();
-                uint stringSize = reader.ReadUInt32();
-
-                // We dont need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
-                long basePosition = reader.BaseStream.Position;
-
-                // Set position of reader
-                reader.BaseStream.Position = dbcRecords * recordSize + basePosition;
-
-                byte[] stringData = reader.ReadBytes((int)stringSize);
-                string fullString = Encoding.UTF8.GetString(stringData);
-                string[] strings = fullString.Split(new string[] { "\0" }, StringSplitOptions.None);
-
-                Dictionary<int, string> stringTable = new Dictionary<int, string>();
-                int currentPosition = 0;
-                foreach (string s in strings)
-                {
-                    stringTable.Add(currentPosition, s);
-                    currentPosition += Encoding.UTF8.GetByteCount(s) + 1;
-                }
-
-                // Reset position to base position
-                reader.BaseStream.Position = basePosition;
-
-                // Validate the dbc fields
-                int fieldCounts = FieldCount(fields, DBCType);
-                if (dbcFields != fieldCounts)
-                    throw new InvalidDBCFields(DBCType.ToString());
-
-                // Loop through all of the records in the DBC file
-                for (uint i = 0; i < dbcRecords; ++i)
-                {
-                    Object dbcObject = Activator.CreateInstance(DBCType);
-
-                    foreach (FieldInfo field in fields)
-                    {
-                        switch (Type.GetTypeCode(field.FieldType))
-                        {
-                            case TypeCode.Object:
-                            {
-                                if (field.FieldType == typeof(LocalizedString))
-                                {
-                                    string value = "";
-                                    for (uint j = 0; j < LocalizedString.Size - 1; ++j)
-                                    {
-                                        int offsetKey = reader.ReadInt32();
-                                        if (value == "" && offsetKey != 0 && stringTable.TryGetValue(offsetKey, out string stringFromTable))
-                                        {
-                                            value = stringFromTable;
-                                        }
-                                    }
-
-                                    LocaleFlag = reader.ReadUInt32();
-
-                                    field.SetValue(dbcObject, (LocalizedString)value);
-                                }
-                                else if (field.FieldType.IsArray)
-                                {
-                                    Array array;
-                                    int arrayLength;
-
-                                    switch (Type.GetTypeCode(field.FieldType.GetElementType()))
-                                    {
-                                        case TypeCode.Int32:
-                                            // Get length of array
-                                            arrayLength = ((int[])field.GetValue(dbcObject)).Length;
-
-                                            // Set Array
-                                            array = new int[arrayLength];
-
-                                            // Set Value of DBC object by looping through the array
-                                            for (int j = 0; j < arrayLength; ++j)
-                                                array.SetValue(reader.ReadInt32(), j);
-                                            field.SetValue(dbcObject, array);
-                                            break;
-                                        case TypeCode.UInt32:
-                                            // Get length of array
-                                            arrayLength = ((uint[])field.GetValue(dbcObject)).Length;
-
-                                            // Set Array
-                                            array = new uint[arrayLength];
-
-                                            // Set Value of DBC object by looping through the array
-                                            for (int j = 0; j < arrayLength; ++j)
-                                                array.SetValue(reader.ReadUInt32(), j);
-                                            field.SetValue(dbcObject, array);
-                                            break;
-                                        case TypeCode.Single:
-                                            // Get length of array
-                                            arrayLength = ((float[])field.GetValue(dbcObject)).Length;
-
-                                            // Set Array
-                                            array = new float[arrayLength];
-
-                                            // Set Value of DBC object by looping through the array
-                                            for (int j = 0; j < arrayLength; ++j)
-                                                array.SetValue(reader.ReadSingle(), j);
-                                            field.SetValue(dbcObject, array);
-                                            break;
-                                        default:
-                                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
-                                    }
-                                }
-                                break;
-                            }
-                            case TypeCode.Int32:
-                            {
-                                int value = reader.ReadInt32();
-                                field.SetValue(dbcObject, value);
-                                break;
-                            }
-                            case TypeCode.UInt32:
-                            {
-                                uint value = reader.ReadUInt32();
-                                field.SetValue(dbcObject, value);
-                                break;
-                            }
-                            case TypeCode.Single:
-                            {
-                                float value = reader.ReadSingle();
-                                field.SetValue(dbcObject, value);
-                                break;
-                            }
-                            case TypeCode.String:
-                            {
-                                // Get offset for string table
-                                int offsetKey = reader.ReadInt32();
-
-                                // Check if offset exists in the string table
-                                if (!stringTable.TryGetValue(offsetKey, out string stringFromTable))
-                                    throw new KeyNotFoundException(offsetKey.ToString());
-
-                                string value = stringFromTable;
-                                field.SetValue(dbcObject, value);
-                                break;
-                            }
-                            default:
-                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
-                        }
-                    }
-
-                    // Get the first value of the dbc file and use that as key for the dbc record
-                    Object firstValue = fields[0].GetValue(dbcObject);
-                    uint key = (uint)Convert.ChangeType(firstValue, typeof(uint));
-                    records.Add(key, (T)dbcObject);
-                }
+                // Read the DBC File
+                Read(reader, info);
             }
 
             // Set IsLoaded to true to avoid loading the dbc file multiple times
@@ -237,6 +96,157 @@ namespace DBCLib
             string path = FilePath;
 
             // Todo: Save the DBC file
+        }
+
+        private void Read(BinaryReader reader, DBCInfo info)
+        {
+            if (reader == null)
+                return;
+
+            // Validate the dbc fields
+            FieldInfo[] fields = DBCType.GetFields();
+            int fieldCounts = FieldCount(fields, DBCType);
+            if (info.DBCFields != fieldCounts)
+                throw new InvalidDBCFields(DBCType.ToString());
+
+            // We dont need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
+            long basePosition = reader.BaseStream.Position;
+
+            // Set position of reader
+            reader.BaseStream.Position = info.DBCRecords * info.RecordSize + basePosition;
+
+            byte[] stringData = reader.ReadBytes((int)info.StringSize);
+            string fullString = Encoding.UTF8.GetString(stringData);
+            string[] strings = fullString.Split(new string[] { "\0" }, StringSplitOptions.None);
+
+            Dictionary<int, string> stringTable = new Dictionary<int, string>();
+            int currentPosition = 0;
+            foreach (string s in strings)
+            {
+                stringTable.Add(currentPosition, s);
+                currentPosition += Encoding.UTF8.GetByteCount(s) + 1;
+            }
+
+            // Reset position to base position
+            reader.BaseStream.Position = basePosition;
+
+            // Loop through all of the records in the DBC file
+            for (uint i = 0; i < info.DBCRecords; ++i)
+            {
+                Object instance = Activator.CreateInstance(DBCType);
+
+                foreach (FieldInfo field in fields)
+                {
+                    switch (Type.GetTypeCode(field.FieldType))
+                    {
+                        case TypeCode.Object:
+                        {
+                            if (field.FieldType == typeof(LocalizedString))
+                            {
+                                string value = "";
+                                for (uint j = 0; j < LocalizedString.Size - 1; ++j)
+                                {
+                                    int offsetKey = reader.ReadInt32();
+                                    if (value == "" && offsetKey != 0 && stringTable.TryGetValue(offsetKey, out string stringFromTable))
+                                    {
+                                        value = stringFromTable;
+                                    }
+                                }
+
+                                LocaleFlag = reader.ReadUInt32();
+
+                                field.SetValue(instance, (LocalizedString)value);
+                            }
+                            else if (field.FieldType.IsArray)
+                            {
+                                Array array;
+                                int arrayLength;
+
+                                switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                                {
+                                    case TypeCode.Int32:
+                                        // Get length of array
+                                        arrayLength = ((int[])field.GetValue(instance)).Length;
+
+                                        // Set Array
+                                        array = new int[arrayLength];
+
+                                        // Set Value of DBC object by looping through the array
+                                        for (int j = 0; j < arrayLength; ++j)
+                                            array.SetValue(reader.ReadInt32(), j);
+                                        field.SetValue(instance, array);
+                                        break;
+                                    case TypeCode.UInt32:
+                                        // Get length of array
+                                        arrayLength = ((uint[])field.GetValue(instance)).Length;
+
+                                        // Set Array
+                                        array = new uint[arrayLength];
+
+                                        // Set Value of DBC object by looping through the array
+                                        for (int j = 0; j < arrayLength; ++j)
+                                            array.SetValue(reader.ReadUInt32(), j);
+                                        field.SetValue(instance, array);
+                                        break;
+                                    case TypeCode.Single:
+                                        // Get length of array
+                                        arrayLength = ((float[])field.GetValue(instance)).Length;
+
+                                        // Set Array
+                                        array = new float[arrayLength];
+
+                                        // Set Value of DBC object by looping through the array
+                                        for (int j = 0; j < arrayLength; ++j)
+                                            array.SetValue(reader.ReadSingle(), j);
+                                        field.SetValue(instance, array);
+                                        break;
+                                    default:
+                                        throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
+                                }
+                            }
+                            break;
+                        }
+                        case TypeCode.Int32:
+                        {
+                            int value = reader.ReadInt32();
+                            field.SetValue(instance, value);
+                            break;
+                        }
+                        case TypeCode.UInt32:
+                        {
+                            uint value = reader.ReadUInt32();
+                            field.SetValue(instance, value);
+                            break;
+                        }
+                        case TypeCode.Single:
+                        {
+                            float value = reader.ReadSingle();
+                            field.SetValue(instance, value);
+                            break;
+                        }
+                        case TypeCode.String:
+                        {
+                            // Get offset for string table
+                            int offsetKey = reader.ReadInt32();
+
+                            // Check if offset exists in the string table
+                            if (!stringTable.TryGetValue(offsetKey, out string stringFromTable))
+                                throw new KeyNotFoundException(offsetKey.ToString());
+
+                            string value = stringFromTable;
+                            field.SetValue(instance, value);
+                            break;
+                        }
+                        default:
+                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
+                    }
+                }
+
+                // Get the first value of the dbc file and use that as key for the dbc record
+                Object firstValue = fields[0].GetValue(instance);
+                uint key = (uint)Convert.ChangeType(firstValue, typeof(uint));
+                records.Add(key, (T)instance);
+            }
         }
     }
 }
