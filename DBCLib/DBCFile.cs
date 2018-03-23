@@ -104,6 +104,24 @@ namespace DBCLib
             WriteDBC();
         }
 
+        public void AddEntry(uint key, T value)
+        {
+            if (records.ContainsKey(key))
+                throw new InvalidOperationException();
+
+            // Set the key of the record to the value
+            records[key] = value;
+        }
+
+        public void RemoveEntry(uint key)
+        {
+            if (records.ContainsKey(key))
+                throw new InvalidOperationException();
+
+            // Remove the value from the records
+            records.Remove(key);
+        }
+
         private void ReadDBC(BinaryReader reader, DBCInfo info)
         {
             if (reader == null)
