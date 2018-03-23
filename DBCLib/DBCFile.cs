@@ -23,12 +23,14 @@ namespace DBCLib
             Signature = signature;
             DBCType = typeof(T);
             IsLoaded = false;
+            IsEdited = false;
         }
 
         public string FilePath { get; }
         public string Signature { get; }
         public Type DBCType { get; }
         public bool IsLoaded { get; private set; }
+        public bool IsEdited { get; private set; }
         public uint LocaleFlag { get; private set; }
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
 
@@ -99,6 +101,10 @@ namespace DBCLib
 
         public void SaveDBC()
         {
+            // Dont want to save if no changes done
+            if (!IsEdited)
+                return;
+
             string path = FilePath;
 
             WriteDBC();
@@ -111,6 +117,8 @@ namespace DBCLib
 
             // Set the key of the record to the value
             records[key] = value;
+
+            IsEdited = true;
         }
 
         public void RemoveEntry(uint key)
@@ -120,6 +128,8 @@ namespace DBCLib
 
             // Remove the value from the records
             records.Remove(key);
+
+            IsEdited = true;
         }
 
         public void ReplaceEntry(uint key, T value)
@@ -129,6 +139,8 @@ namespace DBCLib
                 throw new ArgumentException(nameof(key));
 
             records[key] = value;
+
+            IsEdited = true;
         }
 
         private void ReadDBC(BinaryReader reader, DBCInfo info)
