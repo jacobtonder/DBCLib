@@ -122,6 +122,15 @@ namespace DBCLib
             records.Remove(key);
         }
 
+        public void ReplaceEntry(uint key, T value)
+        {
+            // Check if key does not exist
+            if (!records.ContainsKey(key))
+                throw new ArgumentException(nameof(key));
+
+            records[key] = value;
+        }
+
         private void ReadDBC(BinaryReader reader, DBCInfo info)
         {
             if (reader == null)
