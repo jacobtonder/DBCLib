@@ -107,7 +107,7 @@ namespace DBCLib
         public void AddEntry(uint key, T value)
         {
             if (records.ContainsKey(key))
-                throw new InvalidOperationException();
+                throw new ArgumentException();
 
             // Set the key of the record to the value
             records[key] = value;
@@ -116,7 +116,7 @@ namespace DBCLib
         public void RemoveEntry(uint key)
         {
             if (records.ContainsKey(key))
-                throw new InvalidOperationException();
+                throw new ArgumentException();
 
             // Remove the value from the records
             records.Remove(key);
