@@ -112,6 +112,7 @@ namespace DBCLib
 
         public void AddEntry(uint key, T value)
         {
+            // Check if key exists
             if (records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
@@ -123,7 +124,8 @@ namespace DBCLib
 
         public void RemoveEntry(uint key)
         {
-            if (records.ContainsKey(key))
+            // Check if key does not exist
+            if (!records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
             // Remove the value from the records
