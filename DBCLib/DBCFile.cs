@@ -96,7 +96,7 @@ namespace DBCLib
                 dbcReader.ReadDBC(this, reader, info);
             }
 
-            // Set IsLoaded to true to avoid loading the dbc file multiple times
+            // Set IsLoaded to true to avoid loading the same dbc file multiple times
             IsLoaded = true;
         }
 
@@ -143,6 +143,7 @@ namespace DBCLib
             if (!records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
+            // Set the key of the record to the value
             records[key] = value;
 
             IsEdited = true;
