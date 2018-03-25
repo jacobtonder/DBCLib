@@ -1,6 +1,9 @@
-﻿namespace DBCLib
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("DBCLib.Test")]
+namespace DBCLib
 {
-    public struct DBCInfo
+    internal struct DBCInfo
     {
         public uint DBCRecords { get; }
         public uint DBCFields { get; }
