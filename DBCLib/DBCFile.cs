@@ -107,10 +107,11 @@ namespace DBCLib
                 return;
 
             string path = FilePath;
+            string signature = Signature;
 
             // Write to DBC File
             DBCWriter<T> dbcWriter = new DBCWriter<T>();
-            dbcWriter.WriteDBC();
+            dbcWriter.WriteDBC(this, path, signature);
         }
 
         public void AddEntry(uint key, T value)
