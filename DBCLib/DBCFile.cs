@@ -34,7 +34,7 @@ namespace DBCLib
         public uint LocaleFlag { get; internal set; }
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
 
-        internal static int FieldCount(FieldInfo[] fields, Type type)
+        internal int FieldCount(FieldInfo[] fields, Type type)
         {
             Object instance = Activator.CreateInstance(type);
             int fieldCount = 0;
