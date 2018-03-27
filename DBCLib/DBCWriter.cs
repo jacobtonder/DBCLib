@@ -41,7 +41,23 @@ namespace DBCLib
                             {
                                 if (field.FieldType == typeof(LocalizedString))
                                 {
-                                    // TODO
+                                    int position = AddStringToDictionary((LocalizedString)field.GetValue(record));
+
+                                    // Local strings before the local position
+                                    for (uint i = 0; i < dbcFile.LocalPosition; ++i)
+                                    {
+                                        writer.Write(0);
+                                    }
+
+                                    // Write to the Local Position
+                                    writer.Write(position);
+
+                                    // Local strings after the local position
+                                    for (uint j = dbcFile.LocalPosition + 1; j < LocalizedString.Size - 1; ++j)
+                                        writer.Write(0);
+
+                                    // 17th location field
+                                    writer.Write(dbcFile.LocalFlag);
                                 }
                                 else
                                 {

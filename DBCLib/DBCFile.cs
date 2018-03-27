@@ -31,7 +31,8 @@ namespace DBCLib
         public Type DBCType { get; }
         public bool IsLoaded { get; private set; }
         public bool IsEdited { get; private set; }
-        public uint LocaleFlag { get; internal set; }
+        public uint LocalFlag { get; internal set; }
+        public uint LocalPosition { get; internal set; }
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
 
         internal int FieldCount(FieldInfo[] fields, Type type)

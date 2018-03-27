@@ -61,10 +61,11 @@ namespace DBCLib
                                     if (value == "" && offsetKey != 0 && stringTable.TryGetValue(offsetKey, out string stringFromTable))
                                     {
                                         value = stringFromTable;
+                                        dbcFile.LocalPosition = j;
                                     }
                                 }
 
-                                dbcFile.LocaleFlag = reader.ReadUInt32();
+                                dbcFile.LocalFlag = reader.ReadUInt32();
 
                                 field.SetValue(instance, (LocalizedString)value);
                             }
