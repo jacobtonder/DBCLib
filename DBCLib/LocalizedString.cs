@@ -6,19 +6,19 @@
         public static readonly int Size = 17;
         public string String { get; set; }
 
-        public LocalizedString(string s)
+        public LocalizedString(string str)
         {
-            String = s;
+            String = str;
         }
 
-        public static implicit operator LocalizedString(string s)
+        public static implicit operator LocalizedString(string str)
         {
-            return new LocalizedString(s);
+            return new LocalizedString(str);
         }
 
-        public static implicit operator string(LocalizedString s)
+        public static implicit operator string(LocalizedString str)
         {
-            return s.String;
+            return str.String;
         }
     }
 }
