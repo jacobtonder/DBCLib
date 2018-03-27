@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using DBCLib.Exceptions;
@@ -32,6 +33,7 @@ namespace DBCLib
 
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
         internal Type DBCType { get; }
+        public uint MaxKey { get => records.Keys.Max(); }
         internal uint LocalFlag { get; set; }
         internal uint LocalPosition { get; set; }
 
