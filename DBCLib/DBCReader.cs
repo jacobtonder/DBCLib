@@ -32,10 +32,10 @@ namespace DBCLib
 
             Dictionary<int, string> stringTable = new Dictionary<int, string>();
             int currentPosition = 0;
-            foreach (string s in strings)
+            foreach (string str in strings)
             {
-                stringTable.Add(currentPosition, s);
-                currentPosition += Encoding.UTF8.GetByteCount(s) + 1;
+                stringTable.Add(currentPosition, str);
+                currentPosition += Encoding.UTF8.GetByteCount(str) + 1;
             }
 
             // Reset position to base position
