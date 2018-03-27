@@ -21,18 +21,6 @@ namespace DBCLib.Test
         }
 
         [TestMethod]
-        public void Path_AreEqual()
-        {
-            Assert.AreEqual("//path//", dbcFile.FilePath);
-        }
-
-        [TestMethod]
-        public void Signature_AreEqual()
-        {
-            Assert.AreEqual("signature", dbcFile.Signature);
-        }
-
-        [TestMethod]
         public void DBCType_AreEqual()
         {
             Assert.AreEqual(typeof(DBCFileTest), dbcFile.DBCType);

@@ -9,31 +9,31 @@ namespace DBCLib
 {
     public class DBCFile<T> where T : class, new()
     {
+        private readonly string filePath;
+        private readonly string signature;
         private Dictionary<uint, T> records = new Dictionary<uint, T>();
+        private bool isEdited;
+        private bool isLoaded;
 
-        public DBCFile(string path, string signature)
+        public DBCFile(string path, string dbcSignature)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
 
-            if (string.IsNullOrEmpty(signature))
+            if (string.IsNullOrEmpty(dbcSignature))
                 throw new ArgumentNullException(nameof(signature));
 
-            FilePath = path;
-            Signature = signature;
+            filePath = path;
+            signature = dbcSignature;
             DBCType = typeof(T);
-            IsLoaded = false;
-            IsEdited = false;
+            isEdited = false;
+            isLoaded = false;
         }
 
-        public string FilePath { get; }
-        public string Signature { get; }
-        public Type DBCType { get; }
-        public bool IsLoaded { get; private set; }
-        public bool IsEdited { get; private set; }
-        public uint LocalFlag { get; internal set; }
-        public uint LocalPosition { get; internal set; }
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
+        internal Type DBCType { get; }
+        internal uint LocalFlag { get; set; }
+        internal uint LocalPosition { get; set; }
 
         internal int FieldCount(FieldInfo[] fields, Type type)
         {
@@ -75,14 +75,14 @@ namespace DBCLib
         public void LoadDBC()
         {
             // We don't need to load the file multiple times.
-            if (IsLoaded)
+            if (isLoaded)
                 return;
             
-            using (BinaryReader reader = new BinaryReader(File.OpenRead(FilePath)))
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(filePath)))
             {
-                byte[] byteSignature = reader.ReadBytes(Signature.Length);
+                byte[] byteSignature = reader.ReadBytes(signature.Length);
                 string stringSignature = Encoding.UTF8.GetString(byteSignature);
-                if (stringSignature != Signature)
+                if (stringSignature != signature)
                     throw new InvalidSignatureException(stringSignature);
 
                 DBCInfo info = new DBCInfo(
@@ -98,21 +98,18 @@ namespace DBCLib
             }
 
             // Set IsLoaded to true to avoid loading the same dbc file multiple times
-            IsLoaded = true;
+            isLoaded = true;
         }
 
         public void SaveDBC()
         {
             // Dont want to save if no changes done
-            if (!IsEdited)
+            if (!isEdited)
                 return;
-
-            string path = FilePath;
-            string signature = Signature;
 
             // Write to DBC File
             DBCWriter<T> dbcWriter = new DBCWriter<T>();
-            dbcWriter.WriteDBC(this, path, signature);
+            dbcWriter.WriteDBC(this, filePath, signature);
         }
 
         public void AddEntry(uint key, T value)
@@ -124,7 +121,7 @@ namespace DBCLib
             // Set the key of the record to the value
             records[key] = value;
 
-            IsEdited = true;
+            isEdited = true;
         }
 
         public void RemoveEntry(uint key)
@@ -136,7 +133,7 @@ namespace DBCLib
             // Remove the value from the records
             records.Remove(key);
 
-            IsEdited = true;
+            isEdited = true;
         }
 
         public void ReplaceEntry(uint key, T value)
@@ -148,7 +145,7 @@ namespace DBCLib
             // Set the key of the record to the value
             records[key] = value;
 
-            IsEdited = true;
+            isEdited = true;
         }
     }
 }
