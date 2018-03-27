@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -7,6 +9,10 @@ namespace DBCLib
 {
     internal class DBCWriter<T> where T : class, new()
     {
+        private readonly Dictionary<int, int> stringHashes = new Dictionary<int, int>();
+        private readonly Dictionary<int, string> stringTable = new Dictionary<int, string>();
+        private KeyValuePair<int, string> lastItem = new KeyValuePair<int, string>();
+
         internal void WriteDBC(DBCFile<T> dbcFile, string path, string signature)
         {
             using (FileStream fileStream = File.OpenWrite(path))
@@ -76,7 +82,8 @@ namespace DBCLib
                             }
                             case TypeCode.String:
                             {
-                                // TODO
+                                string str = field.GetValue(record) as string;
+                                writer.Write(AddStringToDictionary(str));
                                 break;
                             }
                             case TypeCode.Single:
@@ -90,7 +97,43 @@ namespace DBCLib
                         }
                     }
                 }
+
+                // Write all of the strings to the dbc file
+                byte[] stringTableBytes;
+                foreach (string str in stringTable.Values)
+                {
+                    stringTableBytes = Encoding.UTF8.GetBytes(str);
+                    writer.Write(stringTableBytes);
+                    writer.Write((byte)0);
+                }
+
+                // Todo: Allow for dynamic header size
+                writer.BaseStream.Position = 16;
+                if (stringTable.Count > 0)
+                    writer.Write(stringTable.Last().Key + Encoding.UTF8.GetByteCount(stringTable.Last().Value) + 1);
             }
+        }
+
+        private int AddStringToDictionary(string str)
+        {
+            if (str == null)
+                str = "";
+
+            // Get the hash code of the string
+            int strHash = str.GetHashCode();
+
+            if (stringHashes.TryGetValue(strHash, out int position))
+                return position;
+
+            if (stringTable.Count > 0)
+                position = lastItem.Key + Encoding.UTF8.GetByteCount(lastItem.Value) + 1;
+
+            // Add the values to the dictionaries
+            stringTable.Add(position, str);
+            stringHashes.Add(strHash, position);
+            lastItem = new KeyValuePair<int, string>(position, str);
+
+            return position;
         }
     }
 }
