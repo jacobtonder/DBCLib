@@ -31,7 +31,11 @@ namespace DBCLib
                 writer.Write(fieldCount * 4);
                 writer.Write(0);
 
-                foreach(T record in dbcFile.Records)
+                // Adding an empty string to obtain the correct size
+                if (signature == "WDBC")
+                    AddStringToDictionary(string.Empty);
+
+                foreach (T record in dbcFile.Records)
                 {
                     foreach (FieldInfo field in fields)
                     {
