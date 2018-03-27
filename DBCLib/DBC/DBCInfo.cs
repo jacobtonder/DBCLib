@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("DBCLib.Test")]
-namespace DBCLib
+﻿namespace DBCLib
 {
     internal struct DBCInfo
     {
