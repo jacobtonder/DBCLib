@@ -118,6 +118,12 @@ namespace DBCLib
                             }
                             break;
                         }
+                        case TypeCode.Byte:
+                        {
+                            byte value = reader.ReadByte();
+                            field.SetValue(instance, value);
+                            break;
+                        }
                         case TypeCode.Int32:
                         {
                             int value = reader.ReadInt32();

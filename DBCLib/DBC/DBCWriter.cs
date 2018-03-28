@@ -88,6 +88,12 @@ namespace DBCLib
                                 }
                                 break;
                             }
+                            case TypeCode.Byte:
+                            {
+                                byte value = (byte)field.GetValue(record);
+                                writer.Write(value);
+                                break;
+                            }
                             case TypeCode.Int32:
                             {
                                 int value = (int)field.GetValue(record);
