@@ -2,6 +2,7 @@
 
 namespace DBCLib.Exceptions
 {
+    [Serializable]
     public class InvalidSignatureException : Exception
     {
         public InvalidSignatureException()
