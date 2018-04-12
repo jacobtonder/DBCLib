@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using DBCLib.Test.Structures;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DBCLib.Test
@@ -6,12 +8,12 @@ namespace DBCLib.Test
     [TestClass]
     public class DBCFileTest
     {
-        private DBCFile<DBCFileTest> dbcFile;
+        private DBCFile<CharTitlesEntry> dbcFile;
 
         [TestInitialize]
         public void Initialize()
         {
-            dbcFile = new DBCFile<DBCFileTest>("//path//", "signature");
+            dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
         }
 
         [TestCleanup]
@@ -23,7 +25,7 @@ namespace DBCLib.Test
         [TestMethod]
         public void DBCType_AreEqual()
         {
-            Assert.AreEqual(typeof(DBCFileTest), dbcFile.DBCType);
+            Assert.AreEqual(typeof(CharTitlesEntry), dbcFile.DBCType);
         }
 
         [DataTestMethod]
@@ -34,7 +36,7 @@ namespace DBCLib.Test
         [DataRow(null)]
         public void Constructor_Path_ThrowsArgumentNullException(string path)
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new DBCFile<DBCFileTest>(path, "signature"));
+            Assert.ThrowsException<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>(path, "signature"));
         }
 
         [DataTestMethod]
@@ -42,7 +44,18 @@ namespace DBCLib.Test
         [DataRow(null)]
         public void Constructor_Signature_ThrowsArgumentNullException(string signature)
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new DBCFile<DBCFileTest>("//path//", signature));
+            Assert.ThrowsException<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>("//path//", signature));
+        }
+
+        [TestMethod]
+        public void FieldCount_AreEqual()
+        {
+            FieldInfo[] fields = dbcFile.DBCType.GetFields();
+
+            // Calculate field counts of dbc file
+            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.DBCType);
+
+            Assert.AreEqual(37, fieldCounts);
         }
 
         [TestMethod]
@@ -54,7 +67,7 @@ namespace DBCLib.Test
         [TestMethod]
         public void ReplaceEntry_ThrowsArgumentException()
         {
-            Assert.ThrowsException<ArgumentException>(() => dbcFile.ReplaceEntry(1, new DBCFileTest()));
+            Assert.ThrowsException<ArgumentException>(() => dbcFile.ReplaceEntry(1, new CharTitlesEntry()));
         }
     }
 }
