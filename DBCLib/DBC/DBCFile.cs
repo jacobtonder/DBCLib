@@ -12,7 +12,7 @@ namespace DBCLib
     {
         private readonly string filePath;
         private readonly string signature;
-        private Dictionary<uint, T> records = new Dictionary<uint, T>();
+        private readonly Dictionary<uint, T> records = new Dictionary<uint, T>();
         private bool isEdited;
         private bool isLoaded;
 
@@ -26,13 +26,20 @@ namespace DBCLib
 
             filePath = path;
             signature = dbcSignature;
-            DBCType = typeof(T);
+            dbcType = typeof(T);
             isEdited = false;
             isLoaded = false;
         }
 
         public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
-        internal Type DBCType { get; }
+
+        private readonly Type dbcType;
+
+        internal Type GetDBCType()
+        {
+            return dbcType;
+        }
+
         public uint MaxKey { get => records.Keys.Max(); }
         internal uint LocalFlag { get; set; }
         internal uint LocalPosition { get; set; }

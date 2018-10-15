@@ -15,12 +15,12 @@ namespace DBCLib
                 return;
 
             // Validate the dbc fields
-            FieldInfo[] fields = dbcFile.DBCType.GetFields();
-            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.DBCType);
+            FieldInfo[] fields = dbcFile.GetDBCType().GetFields();
+            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
             if (info.DBCFields != fieldCounts)
-                throw new InvalidDBCFields(dbcFile.DBCType.ToString());
+                throw new InvalidDBCFields(dbcFile.GetDBCType().ToString());
 
-            // We dont need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
+            // We don't need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
             long headerSize = reader.BaseStream.Position;
 
             // Set position of reader
@@ -44,7 +44,7 @@ namespace DBCLib
             // Loop through all of the records in the DBC file
             for (uint i = 0; i < info.DBCRecords; ++i)
             {
-                Object instance = Activator.CreateInstance(dbcFile.DBCType);
+                object instance = Activator.CreateInstance(dbcFile.GetDBCType());
 
                 foreach (FieldInfo field in fields)
                 {
@@ -161,7 +161,7 @@ namespace DBCLib
                 }
 
                 // Get the first value of the dbc file and use that as key for the dbc record
-                Object firstValue = fields[0].GetValue(instance);
+                object firstValue = fields[0].GetValue(instance);
                 uint key = (uint)Convert.ChangeType(firstValue, typeof(uint));
                 dbcFile.AddEntry(key, (T)instance);
             }

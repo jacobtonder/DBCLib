@@ -25,7 +25,7 @@ namespace DBCLib.Test
         [TestMethod]
         public void DBCType_AreEqual()
         {
-            Assert.AreEqual(typeof(CharTitlesEntry), dbcFile.DBCType);
+            Assert.AreEqual(typeof(CharTitlesEntry), dbcFile.GetDBCType());
         }
 
         [DataTestMethod]
@@ -50,10 +50,10 @@ namespace DBCLib.Test
         [TestMethod]
         public void FieldCount_AreEqual()
         {
-            FieldInfo[] fields = dbcFile.DBCType.GetFields();
+            FieldInfo[] fields = dbcFile.GetDBCType().GetFields();
 
             // Calculate field counts of dbc file
-            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.DBCType);
+            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
 
             Assert.AreEqual(37, fieldCounts);
         }
