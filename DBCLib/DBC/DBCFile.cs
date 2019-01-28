@@ -87,6 +87,9 @@ namespace DBCLib
             if (isLoaded)
                 return;
             
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(filePath);
+
             using (BinaryReader reader = new BinaryReader(File.OpenRead(filePath)))
             {
                 byte[] byteSignature = reader.ReadBytes(signature.Length);
