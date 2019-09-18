@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using DBCLib.Exceptions;
 
@@ -14,8 +13,8 @@ namespace DBCLib
             if (reader == null)
                 return;
 
-            // Validate the dbc fields
-            FieldInfo[] fields = dbcFile.GetDBCType().GetFields();
+            // Validate the DBC fields
+            var fields = dbcFile.GetDBCType().GetFields();
             int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
             if (info.DBCFields != fieldCounts)
                 throw new InvalidDBCFields(dbcFile.GetDBCType().ToString());
@@ -26,12 +25,12 @@ namespace DBCLib
             // Set position of reader
             reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
 
-            byte[] stringData = reader.ReadBytes((int)info.StringSize);
+            var stringData = reader.ReadBytes((int)info.StringSize);
             string fullString = Encoding.UTF8.GetString(stringData);
-            string[] strings = fullString.Split(new string[] { "\0" }, StringSplitOptions.None);
+            var strings = fullString.Split(new[] { "\0" }, StringSplitOptions.None);
 
-            Dictionary<int, string> stringTable = new Dictionary<int, string>();
-            int currentPosition = 0;
+            var stringTable = new Dictionary<int, string>();
+            var currentPosition = 0;
             foreach (string str in strings)
             {
                 stringTable.Add(currentPosition, str);
@@ -44,9 +43,9 @@ namespace DBCLib
             // Loop through all of the records in the DBC file
             for (uint i = 0; i < info.DBCRecords; ++i)
             {
-                object instance = Activator.CreateInstance(dbcFile.GetDBCType());
+                var instance = Activator.CreateInstance(dbcFile.GetDBCType());
 
-                foreach (FieldInfo field in fields)
+                foreach (var field in fields)
                 {
                     switch (Type.GetTypeCode(field.FieldType))
                     {
@@ -54,7 +53,7 @@ namespace DBCLib
                         {
                             if (field.FieldType == typeof(LocalizedString))
                             {
-                                string value = "";
+                                var value = "";
                                 for (uint j = 0; j < LocalizedString.Size - 1; ++j)
                                 {
                                     int offsetKey = reader.ReadInt32();
@@ -84,7 +83,7 @@ namespace DBCLib
                                         array = new int[arrayLength];
 
                                         // Set Value of DBC object by looping through the array
-                                        for (int j = 0; j < arrayLength; ++j)
+                                        for (var j = 0; j < arrayLength; ++j)
                                             array.SetValue(reader.ReadInt32(), j);
                                         field.SetValue(instance, array);
                                         break;
@@ -96,7 +95,7 @@ namespace DBCLib
                                         array = new uint[arrayLength];
 
                                         // Set Value of DBC object by looping through the array
-                                        for (int j = 0; j < arrayLength; ++j)
+                                        for (var j = 0; j < arrayLength; ++j)
                                             array.SetValue(reader.ReadUInt32(), j);
                                         field.SetValue(instance, array);
                                         break;
@@ -108,7 +107,7 @@ namespace DBCLib
                                         array = new float[arrayLength];
 
                                         // Set Value of DBC object by looping through the array
-                                        for (int j = 0; j < arrayLength; ++j)
+                                        for (var j = 0; j < arrayLength; ++j)
                                             array.SetValue(reader.ReadSingle(), j);
                                         field.SetValue(instance, array);
                                         break;
@@ -160,9 +159,9 @@ namespace DBCLib
                     }
                 }
 
-                // Get the first value of the dbc file and use that as key for the dbc record
-                object firstValue = fields[0].GetValue(instance);
-                uint key = (uint)Convert.ChangeType(firstValue, typeof(uint));
+                // Get the first value of the DBC file and use that as key for the DBC record
+                var firstValue = fields[0].GetValue(instance);
+                var key = (uint)Convert.ChangeType(firstValue, typeof(uint));
                 dbcFile.AddEntry(key, (T)instance);
             }
         }

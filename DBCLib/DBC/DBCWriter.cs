@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace DBCLib
@@ -15,17 +14,17 @@ namespace DBCLib
 
         internal void WriteDBC(DBCFile<T> dbcFile, string path, string signature)
         {
-            using (FileStream fileStream = File.OpenWrite(path))
-            using (BinaryWriter writer = new BinaryWriter(fileStream))
+            using (var fileStream = File.OpenWrite(path))
+            using (var writer = new BinaryWriter(fileStream))
             {
                 // Sign the file with the signature
-                byte[] signatureBytes = Encoding.UTF8.GetBytes(signature);
+                var signatureBytes = Encoding.UTF8.GetBytes(signature);
                 writer.Write(signatureBytes);
                 writer.Write(dbcFile.Records.Count);
 
                 // Get fields of the DBC type and write to the DBC file
-                Type dbcType = dbcFile.GetDBCType();
-                FieldInfo[] fields = dbcType.GetFields();
+                var dbcType = dbcFile.GetDBCType();
+                var fields = dbcType.GetFields();
                 int fieldCount = dbcFile.FieldCount(fields, dbcType);
                 writer.Write(fieldCount);
                 writer.Write(fieldCount * 4);
@@ -35,9 +34,9 @@ namespace DBCLib
                 if (signature == "WDBC")
                     AddStringToDictionary(string.Empty);
 
-                foreach (T record in dbcFile.Records)
+                foreach (var record in dbcFile.Records)
                 {
-                    foreach (FieldInfo field in fields)
+                    foreach (var field in fields)
                     {
                         switch (Type.GetTypeCode(field.FieldType))
                         {
@@ -72,15 +71,15 @@ namespace DBCLib
                                         switch (Type.GetTypeCode(field.FieldType.GetElementType()))
                                         {
                                             case TypeCode.Int32:
-                                                for (int i = 0; i < arrayLength; ++i)
+                                                for (var i = 0; i < arrayLength; ++i)
                                                     writer.Write((int)array.GetValue(i));
                                                 break;
                                             case TypeCode.UInt32:
-                                                for (int i = 0; i < arrayLength; ++i)
+                                                for (var i = 0; i < arrayLength; ++i)
                                                     writer.Write((uint)array.GetValue(i));
                                                 break;
                                             case TypeCode.Single:
-                                                for (int i = 0; i < arrayLength; ++i)
+                                                for (var i = 0; i < arrayLength; ++i)
                                                     writer.Write((float)array.GetValue(i));
                                                 break;
                                             default:
@@ -92,31 +91,31 @@ namespace DBCLib
                             }
                             case TypeCode.Byte:
                             {
-                                byte value = (byte)field.GetValue(record);
+                                var value = (byte)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                             case TypeCode.Int32:
                             {
-                                int value = (int)field.GetValue(record);
+                                var value = (int)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                             case TypeCode.UInt32:
                             {
-                                uint value = (uint)field.GetValue(record);
+                                var value = (uint)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                             case TypeCode.String:
                             {
-                                string str = field.GetValue(record) as string;
+                                var str = field.GetValue(record) as string;
                                 writer.Write(AddStringToDictionary(str));
                                 break;
                             }
                             case TypeCode.Single:
                             {
-                                float value = (float)field.GetValue(record);
+                                var value = (float)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
@@ -126,15 +125,14 @@ namespace DBCLib
                     }
                 }
 
-                // Write all of the strings to the dbc file
-                foreach (string str in stringTable.Values)
+                // Write all of the strings to the DBC file
+                foreach (var stringTableBytes in stringTable.Values.Select(str => Encoding.UTF8.GetBytes(str)))
                 {
-                    var stringTableBytes = Encoding.UTF8.GetBytes(str);
                     writer.Write(stringTableBytes);
                     writer.Write((byte)0);
                 }
 
-                // Todo: Allow for dynamic header size
+                // TODO: Allow for dynamic header size
                 writer.BaseStream.Position = 16;
                 if (stringTable.Count > 0)
                     writer.Write(stringTable.Last().Key + Encoding.UTF8.GetByteCount(stringTable.Last().Value) + 1);
@@ -147,9 +145,9 @@ namespace DBCLib
                 str = "";
 
             // Get the hash code of the string
-            int strHash = str.GetHashCode();
+            int hashCode = str.GetHashCode();
 
-            if (stringHashes.TryGetValue(strHash, out int position))
+            if (stringHashes.TryGetValue(hashCode, out int position))
                 return position;
 
             if (stringTable.Count > 0)
@@ -157,7 +155,7 @@ namespace DBCLib
 
             // Add the values to the dictionaries
             stringTable.Add(position, str);
-            stringHashes.Add(strHash, position);
+            stringHashes.Add(hashCode, position);
             lastItem = new KeyValuePair<int, string>(position, str);
 
             return position;

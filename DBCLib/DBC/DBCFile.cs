@@ -46,9 +46,9 @@ namespace DBCLib
 
         internal int FieldCount(FieldInfo[] fields, Type type)
         {
-            Object instance = Activator.CreateInstance(type);
-            int fieldCount = 0;
-            foreach (FieldInfo field in fields)
+            var instance = Activator.CreateInstance(type);
+            var fieldCount = 0;
+            foreach (var field in fields)
             {
                 if (Type.GetTypeCode(field.FieldType) == TypeCode.Object)
                 {
@@ -90,14 +90,14 @@ namespace DBCLib
             if (!File.Exists(filePath))
                 throw new FileNotFoundException(filePath);
 
-            using (BinaryReader reader = new BinaryReader(File.OpenRead(filePath)))
+            using (var reader = new BinaryReader(File.OpenRead(filePath)))
             {
-                byte[] byteSignature = reader.ReadBytes(signature.Length);
+                var byteSignature = reader.ReadBytes(signature.Length);
                 string stringSignature = Encoding.UTF8.GetString(byteSignature);
                 if (stringSignature != signature)
                     throw new InvalidSignatureException(stringSignature);
 
-                DBCInfo info = new DBCInfo(
+                var info = new DBCInfo(
                     reader.ReadUInt32(), // DBC Records
                     reader.ReadUInt32(), // DBC Fields
                     reader.ReadUInt32(), // Record Size
@@ -105,11 +105,11 @@ namespace DBCLib
                 );
 
                 // Read the DBC File
-                DBCReader<T> dbcReader = new DBCReader<T>();
+                var dbcReader = new DBCReader<T>();
                 dbcReader.ReadDBC(this, reader, info);
             }
 
-            // Set IsLoaded to true to avoid loading the same dbc file multiple times
+            // Set IsLoaded to true to avoid loading the same DBC file multiple times
             isLoaded = true;
         }
 
@@ -120,7 +120,7 @@ namespace DBCLib
                 return;
 
             // Write to DBC File
-            DBCWriter<T> dbcWriter = new DBCWriter<T>();
+            var dbcWriter = new DBCWriter<T>();
             dbcWriter.WriteDBC(this, filePath, signature);
         }
 
