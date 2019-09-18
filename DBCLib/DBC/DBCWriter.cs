@@ -11,19 +11,19 @@ namespace DBCLib
     {
         private readonly Dictionary<int, int> stringHashes = new Dictionary<int, int>();
         private readonly Dictionary<int, string> stringTable = new Dictionary<int, string>();
-        private KeyValuePair<int, string> lastItem = new KeyValuePair<int, string>();
+        private KeyValuePair<int, string> lastItem;
 
         internal void WriteDBC(DBCFile<T> dbcFile, string path, string signature)
         {
             using (FileStream fileStream = File.OpenWrite(path))
             using (BinaryWriter writer = new BinaryWriter(fileStream))
             {
-                // Sign the file with the signture
+                // Sign the file with the signature
                 byte[] signatureBytes = Encoding.UTF8.GetBytes(signature);
                 writer.Write(signatureBytes);
                 writer.Write(dbcFile.Records.Count);
 
-                // Get fields of the dbc type and write to the dbc file
+                // Get fields of the DBC type and write to the DBC file
                 Type dbcType = dbcFile.GetDBCType();
                 FieldInfo[] fields = dbcType.GetFields();
                 int fieldCount = dbcFile.FieldCount(fields, dbcType);
@@ -65,25 +65,27 @@ namespace DBCLib
                                 }
                                 else
                                 {
-                                    Array array = field.GetValue(record) as Array;
-                                    int arrayLength = array.Length;
-
-                                    switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                                    if (field.GetValue(record) is Array array)
                                     {
-                                        case TypeCode.Int32:
-                                            for (int i = 0; i < arrayLength; ++i)
-                                                writer.Write((int)array.GetValue(i));
-                                            break;
-                                        case TypeCode.UInt32:
-                                            for (int i = 0; i < arrayLength; ++i)
-                                                writer.Write((uint)array.GetValue(i));
-                                            break;
-                                        case TypeCode.Single:
-                                            for (int i = 0; i < arrayLength; ++i)
-                                                writer.Write((float)array.GetValue(i));
-                                            break;
-                                        default:
-                                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
+                                        int arrayLength = array.Length;
+
+                                        switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                                        {
+                                            case TypeCode.Int32:
+                                                for (int i = 0; i < arrayLength; ++i)
+                                                    writer.Write((int)array.GetValue(i));
+                                                break;
+                                            case TypeCode.UInt32:
+                                                for (int i = 0; i < arrayLength; ++i)
+                                                    writer.Write((uint)array.GetValue(i));
+                                                break;
+                                            case TypeCode.Single:
+                                                for (int i = 0; i < arrayLength; ++i)
+                                                    writer.Write((float)array.GetValue(i));
+                                                break;
+                                            default:
+                                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
+                                        }
                                     }
                                 }
                                 break;
@@ -125,10 +127,9 @@ namespace DBCLib
                 }
 
                 // Write all of the strings to the dbc file
-                byte[] stringTableBytes;
                 foreach (string str in stringTable.Values)
                 {
-                    stringTableBytes = Encoding.UTF8.GetBytes(str);
+                    var stringTableBytes = Encoding.UTF8.GetBytes(str);
                     writer.Write(stringTableBytes);
                     writer.Write((byte)0);
                 }
