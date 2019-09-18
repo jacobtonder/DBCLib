@@ -31,7 +31,7 @@ namespace DBCLib
             isLoaded = false;
         }
 
-        public Dictionary<uint, T>.ValueCollection Records { get => records.Values; }
+        public Dictionary<uint, T>.ValueCollection Records => records.Values;
 
         private readonly Type dbcType;
 
@@ -40,7 +40,7 @@ namespace DBCLib
             return dbcType;
         }
 
-        public uint MaxKey { get => records.Keys.Max(); }
+        public uint MaxKey => records.Keys.Max();
         internal uint LocalFlag { get; set; }
         internal uint LocalPosition { get; set; }
 
@@ -115,7 +115,7 @@ namespace DBCLib
 
         public void SaveDBC()
         {
-            // Dont want to save if no changes done
+            // Don't want to save if no changes done
             if (!isEdited)
                 return;
 
