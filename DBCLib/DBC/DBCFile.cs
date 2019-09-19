@@ -83,7 +83,6 @@ namespace DBCLib
 
         public void LoadDBC()
         {
-            // We don't need to load the file multiple times.
             if (isLoaded)
                 return;
             
@@ -98,10 +97,10 @@ namespace DBCLib
                     throw new InvalidSignatureException(stringSignature);
 
                 var info = new DBCInfo(
-                    reader.ReadUInt32(), // DBC Records
-                    reader.ReadUInt32(), // DBC Fields
-                    reader.ReadUInt32(), // Record Size
-                    reader.ReadUInt32()  // String Size
+                    reader.ReadUInt32(),    // DBC Records
+                    reader.ReadUInt32(),     // DBC Fields
+                    reader.ReadUInt32(),    // Record Size
+                    reader.ReadUInt32()     // String Size
                 );
 
                 // Read the DBC File
@@ -115,22 +114,18 @@ namespace DBCLib
 
         public void SaveDBC()
         {
-            // Don't want to save if no changes done
             if (!isEdited)
                 return;
 
-            // Write to DBC File
             var dbcWriter = new DBCWriter<T>();
             dbcWriter.WriteDBC(this, filePath, signature);
         }
 
         public void AddEntry(uint key, T value)
         {
-            // Check if key exists
             if (records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
-            // Set the key of the record to the value
             records[key] = value;
 
             isEdited = true;
@@ -138,11 +133,9 @@ namespace DBCLib
 
         public void RemoveEntry(uint key)
         {
-            // Check if key does not exist
             if (!records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
-            // Remove the value from the records
             records.Remove(key);
 
             isEdited = true;
@@ -150,11 +143,9 @@ namespace DBCLib
 
         public void ReplaceEntry(uint key, T value)
         {
-            // Check if key does not exist
             if (!records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
-            // Set the key of the record to the value
             records[key] = value;
 
             isEdited = true;
