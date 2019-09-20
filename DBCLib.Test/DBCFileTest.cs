@@ -50,9 +50,9 @@ namespace DBCLib.Test
         [TestMethod]
         public void FieldCount_AreEqual()
         {
-            FieldInfo[] fields = dbcFile.GetDBCType().GetFields();
+            var fields = dbcFile.GetDBCType().GetFields();
 
-            // Calculate field counts of dbc file
+            // Calculate field counts of DBC file
             int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
 
             Assert.AreEqual(37, fieldCounts);

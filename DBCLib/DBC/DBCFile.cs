@@ -35,10 +35,7 @@ namespace DBCLib
 
         private readonly Type dbcType;
 
-        internal Type GetDBCType()
-        {
-            return dbcType;
-        }
+        internal Type GetDBCType() => dbcType;
 
         public uint MaxKey => records.Keys.Max();
         internal uint LocalFlag { get; set; }
@@ -98,7 +95,7 @@ namespace DBCLib
 
                 var info = new DBCInfo(
                     reader.ReadUInt32(),    // DBC Records
-                    reader.ReadUInt32(),     // DBC Fields
+                    reader.ReadUInt32(),    // DBC Fields
                     reader.ReadUInt32(),    // Record Size
                     reader.ReadUInt32()     // String Size
                 );
