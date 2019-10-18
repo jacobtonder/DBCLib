@@ -10,9 +10,10 @@ namespace DBCLib
 {
     public class DBCFile<T> where T : class, new()
     {
+        private readonly Dictionary<uint, T> records = new Dictionary<uint, T>();
+        private readonly Type dbcType;
         private readonly string filePath;
         private readonly string signature;
-        private readonly Dictionary<uint, T> records = new Dictionary<uint, T>();
         private bool isEdited;
         private bool isLoaded;
 
@@ -32,51 +33,11 @@ namespace DBCLib
         }
 
         public Dictionary<uint, T>.ValueCollection Records => records.Values;
-
-        private readonly Type dbcType;
+        public uint MaxKey => records.Keys.Max();
 
         internal Type GetDBCType() => dbcType;
-
-        public uint MaxKey => records.Keys.Max();
         internal uint LocalFlag { get; set; }
         internal uint LocalPosition { get; set; }
-
-        internal int FieldCount(FieldInfo[] fields, Type type)
-        {
-            var instance = Activator.CreateInstance(type);
-            var fieldCount = 0;
-            foreach (var field in fields)
-            {
-                if (Type.GetTypeCode(field.FieldType) == TypeCode.Object)
-                {
-                    if (field.FieldType == typeof(LocalizedString))
-                    {
-                        fieldCount += LocalizedString.Size;
-                    }
-                    else if (field.FieldType.IsArray)
-                    {
-                        switch (Type.GetTypeCode(field.FieldType.GetElementType()))
-                        {
-                            case TypeCode.Int32:
-                                fieldCount += ((int[])field.GetValue(instance)).Length;
-                                break;
-                            case TypeCode.UInt32:
-                                fieldCount += ((uint[])field.GetValue(instance)).Length;
-                                break;
-                            case TypeCode.Single:
-                                fieldCount += ((float[])field.GetValue(instance)).Length;
-                                break;
-                            default:
-                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
-                        }
-                    }
-                }
-                else
-                    ++fieldCount;
-            }
-
-            return fieldCount;
-        }
 
         public void LoadDBC()
         {
@@ -146,6 +107,43 @@ namespace DBCLib
             records[key] = value;
 
             isEdited = true;
+        }
+
+        internal int FieldCount(FieldInfo[] fields, Type type)
+        {
+            var instance = Activator.CreateInstance(type);
+            var fieldCount = 0;
+            foreach (var field in fields)
+            {
+                if (Type.GetTypeCode(field.FieldType) == TypeCode.Object)
+                {
+                    if (field.FieldType == typeof(LocalizedString))
+                    {
+                        fieldCount += LocalizedString.Size;
+                    }
+                    else if (field.FieldType.IsArray)
+                    {
+                        switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                        {
+                            case TypeCode.Int32:
+                                fieldCount += ((int[])field.GetValue(instance)).Length;
+                                break;
+                            case TypeCode.UInt32:
+                                fieldCount += ((uint[])field.GetValue(instance)).Length;
+                                break;
+                            case TypeCode.Single:
+                                fieldCount += ((float[])field.GetValue(instance)).Length;
+                                break;
+                            default:
+                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
+                        }
+                    }
+                }
+                else
+                    ++fieldCount;
+            }
+
+            return fieldCount;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace DBCLib
 
             var stringData = reader.ReadBytes((int)info.StringSize);
             string fullString = Encoding.UTF8.GetString(stringData);
-            var strings = fullString.Split(new[] { "\0" }, StringSplitOptions.None);
+            var strings = fullString.Split(new[] { '\0' }, StringSplitOptions.None);
 
             var stringTable = new Dictionary<int, string>();
             var currentPosition = 0;
