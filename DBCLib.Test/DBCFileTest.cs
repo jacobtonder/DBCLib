@@ -7,7 +7,7 @@ namespace DBCLib.Test
     public class DBCFileTest
     {
         [Fact]
-        public void DBCType_AreEqual()
+        public void DBCType_Equal()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
 
@@ -23,6 +23,7 @@ namespace DBCLib.Test
         public void Constructor_Path_ThrowsArgumentNullException(string path)
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+
             Assert.Throws<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>(path, "signature"));
         }
 
@@ -32,11 +33,12 @@ namespace DBCLib.Test
         public void Constructor_Signature_ThrowsArgumentNullException(string signature)
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+
             Assert.Throws<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>("//path//", signature));
         }
 
         [Fact]
-        public void FieldCount_AreEqual()
+        public void FieldCount_Equal()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
             var fields = dbcFile.GetDBCType().GetFields();
@@ -51,6 +53,7 @@ namespace DBCLib.Test
         public void RemoveEntry_ThrowsArgumentException()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+
             Assert.Throws<ArgumentException>(() => dbcFile.RemoveEntry(1));
         }
 
@@ -58,6 +61,7 @@ namespace DBCLib.Test
         public void ReplaceEntry_ThrowsArgumentException()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+
             Assert.Throws<ArgumentException>(() => dbcFile.ReplaceEntry(1, new CharTitlesEntry()));
         }
     }
