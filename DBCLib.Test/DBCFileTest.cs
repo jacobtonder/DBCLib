@@ -37,6 +37,20 @@ namespace DBCLib.Test
             Assert.Throws<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>("//path//", signature));
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        [InlineData(uint.MaxValue)]
+        public void MaxKey_Equal(uint key)
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            dbcFile.AddEntry(key, new CharTitlesEntry());
+
+            Assert.Equal(key, dbcFile.MaxKey);
+        }
+
         [Fact]
         public void FieldCount_Equal()
         {
