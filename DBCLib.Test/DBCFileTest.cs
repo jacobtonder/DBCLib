@@ -1,73 +1,64 @@
-﻿using System;
-using System.Reflection;
+using System;
+using Xunit;
 using DBCLib.Test.Structures;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DBCLib.Test
 {
-    [TestClass]
     public class DBCFileTest
     {
-        private DBCFile<CharTitlesEntry> dbcFile;
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            dbcFile = null;
-        }
-
-        [TestMethod]
+        [Fact]
         public void DBCType_AreEqual()
         {
-            Assert.AreEqual(typeof(CharTitlesEntry), dbcFile.GetDBCType());
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+
+            Assert.Equal(typeof(CharTitlesEntry), dbcFile.GetDBCType());
         }
 
-        [DataTestMethod]
-        [DataRow("")]
-        [DataRow(" ")]
-        [DataRow("     ")]
-        [DataRow("            ")]
-        [DataRow(null)]
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("     ")]
+        [InlineData("            ")]
+        [InlineData(null)]
         public void Constructor_Path_ThrowsArgumentNullException(string path)
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>(path, "signature"));
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            Assert.Throws<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>(path, "signature"));
         }
 
-        [DataTestMethod]
-        [DataRow("")]
-        [DataRow(null)]
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
         public void Constructor_Signature_ThrowsArgumentNullException(string signature)
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>("//path//", signature));
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            Assert.Throws<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>("//path//", signature));
         }
 
-        [TestMethod]
+        [Fact]
         public void FieldCount_AreEqual()
         {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
             var fields = dbcFile.GetDBCType().GetFields();
 
             // Calculate field counts of DBC file
             int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
 
-            Assert.AreEqual(37, fieldCounts);
+            Assert.Equal(37, fieldCounts);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveEntry_ThrowsArgumentException()
         {
-            Assert.ThrowsException<ArgumentException>(() => dbcFile.RemoveEntry(1));
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            Assert.Throws<ArgumentException>(() => dbcFile.RemoveEntry(1));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReplaceEntry_ThrowsArgumentException()
         {
-            Assert.ThrowsException<ArgumentException>(() => dbcFile.ReplaceEntry(1, new CharTitlesEntry()));
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            Assert.Throws<ArgumentException>(() => dbcFile.ReplaceEntry(1, new CharTitlesEntry()));
         }
     }
 }

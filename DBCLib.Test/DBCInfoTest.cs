@@ -1,46 +1,39 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace DBCLib.Test
 {
-    [TestClass]
     public class DBCInfoTest
     {
-        private DBCInfo dbcInfo;
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            dbcInfo = new DBCInfo(0, 1, 2, 3);
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            dbcInfo = default(DBCInfo);
-        }
-
-        [TestMethod]
+        [Fact]
         public void DBCRecords_AreEqual()
         {
-            Assert.AreEqual((uint)0, dbcInfo.DBCRecords);
+            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+
+            Assert.Equal((uint)0, dbcInfo.DBCRecords);
         }
 
-        [TestMethod]
+        [Fact]
         public void DBCFields_AreEqual()
         {
-            Assert.AreEqual((uint)1, dbcInfo.DBCFields);
+            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+
+            Assert.Equal((uint)1, dbcInfo.DBCFields);
         }
 
-        [TestMethod]
+        [Fact]
         public void RecordSize_AreEqual()
         {
-            Assert.AreEqual((uint)2, dbcInfo.RecordSize);
+            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+
+            Assert.Equal((uint)2, dbcInfo.RecordSize);
         }
 
-        [TestMethod]
+        [Fact]
         public void StringSize_AreEqual()
         {
-            Assert.AreEqual((uint)3, dbcInfo.StringSize);
+            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+
+            Assert.Equal((uint)3, dbcInfo.StringSize);
         }
     }
 }
