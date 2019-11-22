@@ -81,13 +81,10 @@ namespace DBCLib
 
         public void AddEntry(uint key, T value)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
             if (records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
-            records[key] = value;
+            records[key] = value ?? throw new ArgumentNullException(nameof(value));
 
             isEdited = true;
         }
@@ -107,7 +104,7 @@ namespace DBCLib
             if (!records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 
-            records[key] = value;
+            records[key] = value ?? throw new ArgumentNullException(nameof(value));
 
             isEdited = true;
         }

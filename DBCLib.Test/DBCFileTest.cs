@@ -50,6 +50,24 @@ namespace DBCLib.Test
         }
 
         [Fact]
+        public void RemoveEntry_DoesNotContain()
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            CharTitlesEntry charTitlesEntry = new CharTitlesEntry
+            {
+                Id = 1,
+                NameMale = "Title %s",
+                NameFemale = "Title %s",
+                TitleMaskId = 1
+            };
+
+            dbcFile.AddEntry(1, charTitlesEntry);
+            dbcFile.RemoveEntry(1);
+
+            Assert.DoesNotContain(charTitlesEntry, dbcFile.Records);
+        }
+
+        [Fact]
         public void RemoveEntry_ThrowsArgumentException()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
@@ -63,6 +81,15 @@ namespace DBCLib.Test
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
 
             Assert.Throws<ArgumentException>(() => dbcFile.ReplaceEntry(1, new CharTitlesEntry()));
+        }
+
+        [Fact]
+        public void ReplaceEntry_ThrowsArgumentNullException()
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            dbcFile.AddEntry(1, new CharTitlesEntry());
+
+            Assert.Throws<ArgumentNullException>(() => dbcFile.ReplaceEntry(1, null));
         }
 
         [Fact]
@@ -100,7 +127,7 @@ namespace DBCLib.Test
         }
 
         [Fact]
-        public void AddEntry_ThrowsNullException()
+        public void AddEntry_ThrowsArgumentNullException()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
 
