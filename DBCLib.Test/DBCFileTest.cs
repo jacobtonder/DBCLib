@@ -76,6 +76,24 @@ namespace DBCLib.Test
         }
 
         [Fact]
+        public void ReplaceEntry_Contains()
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            CharTitlesEntry charTitlesEntry = new CharTitlesEntry
+            {
+                Id = 1,
+                NameMale = "Title %s",
+                NameFemale = "Title %s",
+                TitleMaskId = 1
+            };
+
+            dbcFile.AddEntry(1, new CharTitlesEntry());
+            dbcFile.ReplaceEntry(1, charTitlesEntry);
+
+            Assert.Contains(charTitlesEntry, dbcFile.Records);
+        }
+
+        [Fact]
         public void ReplaceEntry_ThrowsArgumentException()
         {
             DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");

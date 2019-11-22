@@ -75,6 +75,8 @@ namespace DBCLib
             if (!isEdited)
                 return;
 
+            isEdited = false;
+
             var dbcWriter = new DBCWriter<T>();
             dbcWriter.WriteDBC(this, filePath, signature);
         }
