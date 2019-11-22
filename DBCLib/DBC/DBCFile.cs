@@ -81,6 +81,9 @@ namespace DBCLib
 
         public void AddEntry(uint key, T value)
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
             if (records.ContainsKey(key))
                 throw new ArgumentException(nameof(key));
 

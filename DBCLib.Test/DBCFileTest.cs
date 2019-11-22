@@ -64,5 +64,47 @@ namespace DBCLib.Test
 
             Assert.Throws<ArgumentException>(() => dbcFile.ReplaceEntry(1, new CharTitlesEntry()));
         }
+
+        [Fact]
+        public void AddEntry_Contains()
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            CharTitlesEntry charTitlesEntry = new CharTitlesEntry
+            {
+                Id = 1,
+                NameMale = "Title %s",
+                NameFemale = "Title %s",
+                TitleMaskId = 1
+            };
+
+            dbcFile.AddEntry(1, charTitlesEntry);
+
+            Assert.Contains(charTitlesEntry, dbcFile.Records);
+        }
+
+        [Fact]
+        public void AddEntry_ThrowsArgumentException()
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+            CharTitlesEntry charTitlesEntry = new CharTitlesEntry
+            {
+                Id = 1,
+                NameMale = "Title %s",
+                NameFemale = "Title %s",
+                TitleMaskId = 1
+            };
+
+            dbcFile.AddEntry(1, charTitlesEntry);
+
+            Assert.Throws<ArgumentException>(() => dbcFile.AddEntry(1, new CharTitlesEntry()));
+        }
+
+        [Fact]
+        public void AddEntry_ThrowsNullException()
+        {
+            DBCFile<CharTitlesEntry> dbcFile = new DBCFile<CharTitlesEntry>("//path//", "signature");
+
+            Assert.Throws<ArgumentNullException>(() => dbcFile.AddEntry(1, null));
+        }
     }
 }
