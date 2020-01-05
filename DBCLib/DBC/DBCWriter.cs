@@ -141,8 +141,7 @@ namespace DBCLib
 
         private int AddStringToDictionary(string str)
         {
-            if (str == null)
-                str = "";
+            str ??= "";
 
             // Get the hash code of the string
             int hashCode = str.GetHashCode();

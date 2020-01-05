@@ -10,7 +10,7 @@ namespace DBCLib
     {
         internal void ReadDBC(DBCFile<T> dbcFile, BinaryReader reader, DBCInfo info)
         {
-            if (reader == null)
+            if (reader is null)
                 return;
 
             // Validate the DBC fields
