@@ -55,10 +55,10 @@ namespace DBCLib
                     throw new InvalidSignatureException(stringSignature);
 
                 var info = new DBCInfo(
-                    reader.ReadUInt32(),    // DBC Records
-                    reader.ReadUInt32(),    // DBC Fields
-                    reader.ReadUInt32(),    // Record Size
-                    reader.ReadUInt32()     // String Size
+                    dbcRecords: reader.ReadUInt32(),
+                    dbcFields: reader.ReadUInt32(),
+                    recordSize: reader.ReadUInt32(),
+                    stringSize: reader.ReadUInt32()
                 );
 
                 // Read the DBC File
