@@ -14,33 +14,32 @@ namespace DBCLib
 
         internal void WriteDBC(DBCFile<T> dbcFile, string path, string signature)
         {
-            using (var fileStream = File.OpenWrite(path))
-            using (var writer = new BinaryWriter(fileStream))
+            using var fileStream = File.OpenWrite(path);
+            using var writer = new BinaryWriter(fileStream);
+            // Sign the file with the signature
+            var signatureBytes = Encoding.UTF8.GetBytes(signature);
+            writer.Write(signatureBytes);
+            writer.Write(dbcFile.Records.Count);
+
+            // Get fields of the DBC type and write to the DBC file
+            var dbcType = dbcFile.GetDBCType();
+            var fields = dbcType.GetFields();
+            int fieldCount = dbcFile.FieldCount(fields, dbcType);
+            writer.Write(fieldCount);
+            writer.Write(fieldCount * 4);
+            writer.Write(0);
+
+            // Adding an empty string to obtain the correct size
+            if (signature == "WDBC")
+                AddStringToDictionary(string.Empty);
+
+            foreach (var record in dbcFile.Records)
             {
-                // Sign the file with the signature
-                var signatureBytes = Encoding.UTF8.GetBytes(signature);
-                writer.Write(signatureBytes);
-                writer.Write(dbcFile.Records.Count);
-
-                // Get fields of the DBC type and write to the DBC file
-                var dbcType = dbcFile.GetDBCType();
-                var fields = dbcType.GetFields();
-                int fieldCount = dbcFile.FieldCount(fields, dbcType);
-                writer.Write(fieldCount);
-                writer.Write(fieldCount * 4);
-                writer.Write(0);
-
-                // Adding an empty string to obtain the correct size
-                if (signature == "WDBC")
-                    AddStringToDictionary(string.Empty);
-
-                foreach (var record in dbcFile.Records)
+                foreach (var field in fields)
                 {
-                    foreach (var field in fields)
+                    switch (Type.GetTypeCode(field.FieldType))
                     {
-                        switch (Type.GetTypeCode(field.FieldType))
-                        {
-                            case TypeCode.Object:
+                        case TypeCode.Object:
                             {
                                 if (field.FieldType == typeof(LocalizedString))
                                 {
@@ -89,54 +88,53 @@ namespace DBCLib
                                 }
                                 break;
                             }
-                            case TypeCode.Byte:
+                        case TypeCode.Byte:
                             {
                                 var value = (byte)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
-                            case TypeCode.Int32:
+                        case TypeCode.Int32:
                             {
                                 var value = (int)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
-                            case TypeCode.UInt32:
+                        case TypeCode.UInt32:
                             {
                                 var value = (uint)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
-                            case TypeCode.String:
+                        case TypeCode.String:
                             {
                                 var str = field.GetValue(record) as string;
                                 writer.Write(AddStringToDictionary(str));
                                 break;
                             }
-                            case TypeCode.Single:
+                        case TypeCode.Single:
                             {
                                 var value = (float)field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
-                            default:
-                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
-                        }
+                        default:
+                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
                     }
                 }
-
-                // Write all of the strings to the DBC file
-                foreach (var stringTableBytes in stringTable.Values.Select(str => Encoding.UTF8.GetBytes(str)))
-                {
-                    writer.Write(stringTableBytes);
-                    writer.Write((byte)0);
-                }
-
-                // TODO: Allow for dynamic header size
-                writer.BaseStream.Position = 16;
-                if (stringTable.Count > 0)
-                    writer.Write(stringTable.Last().Key + Encoding.UTF8.GetByteCount(stringTable.Last().Value) + 1);
             }
+
+            // Write all of the strings to the DBC file
+            foreach (var stringTableBytes in stringTable.Values.Select(str => Encoding.UTF8.GetBytes(str)))
+            {
+                writer.Write(stringTableBytes);
+                writer.Write((byte)0);
+            }
+
+            // TODO: Allow for dynamic header size
+            writer.BaseStream.Position = 16;
+            if (stringTable.Count > 0)
+                writer.Write(stringTable.Last().Key + Encoding.UTF8.GetByteCount(stringTable.Last().Value) + 1);
         }
 
         private int AddStringToDictionary(string str)
