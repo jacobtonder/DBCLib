@@ -125,20 +125,13 @@ namespace DBCLib
                     }
                     else if (field.FieldType.IsArray)
                     {
-                        switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                        fieldCount += (Type.GetTypeCode(field.FieldType.GetElementType())) switch
                         {
-                            case TypeCode.Int32:
-                                fieldCount += ((int[])field.GetValue(instance)).Length;
-                                break;
-                            case TypeCode.UInt32:
-                                fieldCount += ((uint[])field.GetValue(instance)).Length;
-                                break;
-                            case TypeCode.Single:
-                                fieldCount += ((float[])field.GetValue(instance)).Length;
-                                break;
-                            default:
-                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
-                        }
+                            TypeCode.Int32 => ((int[])field.GetValue(instance)).Length,
+                            TypeCode.UInt32 => ((uint[])field.GetValue(instance)).Length,
+                            TypeCode.Single => ((float[])field.GetValue(instance)).Length,
+                            _ => throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString()),
+                        };
                     }
                 }
                 else
