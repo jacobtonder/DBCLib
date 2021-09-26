@@ -7,6 +7,5 @@
         public LocalizedString NameMale;            // 2-18
         public LocalizedString NameFemale;          // 19-35
         public uint TitleMaskId;                    // 36 Used ingame in the drop down menu.
-        
     }
 }

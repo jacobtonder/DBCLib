@@ -57,7 +57,7 @@ namespace DBCLib
                                 for (uint j = 0; j < LocalizedString.Size - 1; ++j)
                                 {
                                     int offsetKey = reader.ReadInt32();
-                                    if (value == "" && offsetKey != 0 && stringTable.TryGetValue(offsetKey, out string stringFromTable))
+                                    if (string.IsNullOrEmpty(value) && offsetKey != 0 && stringTable.TryGetValue(offsetKey, out string stringFromTable))
                                     {
                                         value = stringFromTable;
                                         dbcFile.LocalPosition = j;

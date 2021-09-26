@@ -125,7 +125,7 @@ namespace DBCLib
                     }
                     else if (field.FieldType.IsArray)
                     {
-                        fieldCount += (Type.GetTypeCode(field.FieldType.GetElementType())) switch
+                        fieldCount += Type.GetTypeCode(field.FieldType.GetElementType()) switch
                         {
                             TypeCode.Int32 => ((int[])field.GetValue(instance)).Length,
                             TypeCode.UInt32 => ((uint[])field.GetValue(instance)).Length,
