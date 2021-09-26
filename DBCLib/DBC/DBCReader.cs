@@ -6,9 +6,9 @@ using DBCLib.Exceptions;
 
 namespace DBCLib
 {
-    internal class DBCReader<T> where T : class, new()
+    internal static class DBCReader<T> where T : class, new()
     {
-        internal void ReadDBC(DBCFile<T> dbcFile, BinaryReader reader, DBCInfo info)
+        internal static void ReadDBC(DBCFile<T> dbcFile, BinaryReader reader, DBCInfo info)
         {
             if (reader is null)
                 return;

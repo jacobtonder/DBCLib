@@ -62,8 +62,7 @@ namespace DBCLib
                 );
 
                 // Read the DBC File
-                var dbcReader = new DBCReader<T>();
-                dbcReader.ReadDBC(this, reader, info);
+                DBCReader<T>.ReadDBC(this, reader, info);
             }
 
             // Set IsLoaded to true to avoid loading the same DBC file multiple times
