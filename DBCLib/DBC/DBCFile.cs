@@ -23,7 +23,7 @@ namespace DBCLib
                 throw new ArgumentNullException(nameof(path));
 
             if (string.IsNullOrEmpty(dbcSignature))
-                throw new ArgumentNullException(nameof(signature));
+                throw new ArgumentNullException(nameof(dbcSignature));
 
             filePath = path;
             signature = dbcSignature;
