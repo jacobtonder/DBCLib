@@ -10,7 +10,7 @@ namespace DBCLib
 {
     public class DBCFile<T> where T : class, new()
     {
-        private readonly Dictionary<uint, T> records = new Dictionary<uint, T>();
+        private readonly Dictionary<uint, T> records = new();
         private readonly Type dbcType;
         private readonly string filePath;
         private readonly string signature;
