@@ -7,7 +7,7 @@ namespace DBCLib.Test
         [Fact]
         public void DBCRecords_Equal()
         {
-            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+            DBCInfo dbcInfo = new(0, 1, 2, 3);
 
             Assert.Equal((uint)0, dbcInfo.DBCRecords);
         }
@@ -15,7 +15,7 @@ namespace DBCLib.Test
         [Fact]
         public void DBCFields_Equal()
         {
-            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+            DBCInfo dbcInfo = new(0, 1, 2, 3);
 
             Assert.Equal((uint)1, dbcInfo.DBCFields);
         }
@@ -23,7 +23,7 @@ namespace DBCLib.Test
         [Fact]
         public void RecordSize_Equal()
         {
-            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+            DBCInfo dbcInfo = new(0, 1, 2, 3);
 
             Assert.Equal((uint)2, dbcInfo.RecordSize);
         }
@@ -31,7 +31,7 @@ namespace DBCLib.Test
         [Fact]
         public void StringSize_Equal()
         {
-            DBCInfo dbcInfo = new DBCInfo(0, 1, 2, 3);
+            DBCInfo dbcInfo = new(0, 1, 2, 3);
 
             Assert.Equal((uint)3, dbcInfo.StringSize);
         }
