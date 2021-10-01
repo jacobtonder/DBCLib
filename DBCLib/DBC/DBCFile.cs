@@ -18,7 +18,7 @@ namespace DBCLib
 
         public DBCFile(string path, string dbcSignature)
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
 
             if (string.IsNullOrEmpty(dbcSignature))
