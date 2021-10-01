@@ -74,7 +74,7 @@ namespace DBCLib.Test
             var fields = dbcFile.GetDBCType().GetFields();
 
             // Calculate field counts of DBC file
-            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
+            int fieldCounts = DBCUtility.FieldCount(fields, dbcFile.GetDBCType());
 
             Assert.Equal(37, fieldCounts);
         }

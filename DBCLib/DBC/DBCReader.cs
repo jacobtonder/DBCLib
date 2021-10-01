@@ -15,7 +15,7 @@ namespace DBCLib
 
             // Validate the DBC fields
             var fields = dbcFile.GetDBCType().GetFields();
-            int fieldCounts = dbcFile.FieldCount(fields, dbcFile.GetDBCType());
+            int fieldCounts = DBCUtility.FieldCount(fields, dbcFile.GetDBCType());
             if (info.DBCFields != fieldCounts)
                 throw new InvalidDBCFields(dbcFile.GetDBCType().ToString());
 

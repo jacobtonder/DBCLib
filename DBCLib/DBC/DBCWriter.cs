@@ -24,7 +24,7 @@ namespace DBCLib
             // Get fields of the DBC type and write to the DBC file
             var dbcType = dbcFile.GetDBCType();
             var fields = dbcType.GetFields();
-            int fieldCount = dbcFile.FieldCount(fields, dbcType);
+            int fieldCount = DBCUtility.FieldCount(fields, dbcType);
             writer.Write(fieldCount);
             writer.Write(fieldCount * 4);
             writer.Write(0);
