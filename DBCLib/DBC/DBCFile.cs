@@ -44,7 +44,7 @@ namespace DBCLib
                 return;
             
             if (!File.Exists(filePath))
-                throw new FileNotFoundException(filePath);
+                throw new FileNotFoundException("Could not find DBC File.", filePath);
 
             using (var reader = new BinaryReader(File.OpenRead(filePath)))
             {
