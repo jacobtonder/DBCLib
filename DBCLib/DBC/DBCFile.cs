@@ -12,20 +12,20 @@ namespace DBCLib
         private readonly Dictionary<uint, T> records = new();
         private readonly Type dbcType;
         private readonly string filePath;
-        private readonly string signature;
+        private readonly string dbcSignature;
         private bool isEdited;
         private bool isLoaded;
 
-        public DBCFile(string path, string dbcSignature)
+        public DBCFile(string filePath, string dbcSignature)
         {
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentNullException(nameof(filePath));
 
             if (string.IsNullOrWhiteSpace(dbcSignature))
                 throw new ArgumentNullException(nameof(dbcSignature));
 
-            filePath = path;
-            signature = dbcSignature;
+            this.filePath = filePath;
+            this.dbcSignature = dbcSignature;
             dbcType = typeof(T);
             isEdited = false;
             isLoaded = false;
@@ -48,9 +48,9 @@ namespace DBCLib
 
             using (var reader = new BinaryReader(File.OpenRead(filePath)))
             {
-                var byteSignature = reader.ReadBytes(signature.Length);
+                var byteSignature = reader.ReadBytes(dbcSignature.Length);
                 string stringSignature = Encoding.UTF8.GetString(byteSignature);
-                if (stringSignature != signature)
+                if (stringSignature != dbcSignature)
                     throw new InvalidSignatureException(stringSignature);
 
                 var info = new DBCInfo(
@@ -76,7 +76,7 @@ namespace DBCLib
             isEdited = false;
 
             var dbcWriter = new DBCWriter<T>();
-            dbcWriter.WriteDBC(this, filePath, signature);
+            dbcWriter.WriteDBC(this, filePath, dbcSignature);
         }
 
         public void AddEntry(uint key, T value)
