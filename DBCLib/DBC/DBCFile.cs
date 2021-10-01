@@ -82,7 +82,7 @@ namespace DBCLib
         public void AddEntry(uint key, T value)
         {
             if (records.ContainsKey(key))
-                throw new ArgumentException(nameof(key));
+                throw new ArgumentException("The DBC File already contains the entry.", nameof(key));
 
             records[key] = value ?? throw new ArgumentNullException(nameof(value));
 
@@ -92,7 +92,7 @@ namespace DBCLib
         public void RemoveEntry(uint key)
         {
             if (!records.ContainsKey(key))
-                throw new ArgumentException(nameof(key));
+                throw new ArgumentException("The DBC File does not contain the entry.", nameof(key));
 
             records.Remove(key);
 
@@ -102,7 +102,7 @@ namespace DBCLib
         public void ReplaceEntry(uint key, T value)
         {
             if (!records.ContainsKey(key))
-                throw new ArgumentException(nameof(key));
+                throw new ArgumentException("The DBC File does not contain the entry.", nameof(key));
 
             records[key] = value ?? throw new ArgumentNullException(nameof(value));
 
