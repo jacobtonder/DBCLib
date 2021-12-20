@@ -46,23 +46,7 @@ namespace DBCLib
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("Could not find DBC File.", filePath);
 
-            using (var reader = new BinaryReader(File.OpenRead(filePath)))
-            {
-                var byteSignature = reader.ReadBytes(dbcSignature.Length);
-                string stringSignature = Encoding.UTF8.GetString(byteSignature);
-                if (stringSignature != dbcSignature)
-                    throw new InvalidSignatureException(stringSignature);
-
-                var info = new DBCInfo(
-                    dbcRecords: reader.ReadUInt32(),
-                    dbcFields: reader.ReadUInt32(),
-                    recordSize: reader.ReadUInt32(),
-                    stringSize: reader.ReadUInt32()
-                );
-
-                // Read the DBC File
-                DBCReader<T>.ReadDBC(this, reader, info);
-            }
+            ReadDBC();
 
             // Set IsLoaded to true to avoid loading the same DBC file multiple times
             isLoaded = true;
@@ -107,6 +91,25 @@ namespace DBCLib
             records[key] = value ?? throw new ArgumentNullException(nameof(value));
 
             isEdited = true;
+        }
+
+        private void ReadDBC()
+        {
+            using var reader = new BinaryReader(File.OpenRead(filePath));
+            var byteSignature = reader.ReadBytes(dbcSignature.Length);
+            string stringSignature = Encoding.UTF8.GetString(byteSignature);
+            if (stringSignature != dbcSignature)
+                throw new InvalidSignatureException(stringSignature);
+
+            var info = new DBCInfo(
+                dbcRecords: reader.ReadUInt32(),
+                dbcFields: reader.ReadUInt32(),
+                recordSize: reader.ReadUInt32(),
+                stringSize: reader.ReadUInt32()
+            );
+
+            // Read the DBC File
+            DBCReader<T>.ReadDBC(this, reader, info);
         }
     }
 }
