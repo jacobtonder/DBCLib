@@ -101,15 +101,8 @@ namespace DBCLib
             if (stringSignature != dbcSignature)
                 throw new InvalidSignatureException(stringSignature);
 
-            var info = new DBCInfo(
-                dbcRecords: reader.ReadUInt32(),
-                dbcFields: reader.ReadUInt32(),
-                recordSize: reader.ReadUInt32(),
-                stringSize: reader.ReadUInt32()
-            );
-
             // Read the DBC File
-            DBCReader<T>.ReadDBC(this, reader, info);
+            DBCReader<T>.ReadDBC(this, reader);
         }
     }
 }

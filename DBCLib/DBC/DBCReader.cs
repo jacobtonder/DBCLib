@@ -8,10 +8,12 @@ namespace DBCLib
 {
     internal static class DBCReader<T> where T : class, new()
     {
-        internal static void ReadDBC(DBCFile<T> dbcFile, BinaryReader reader, DBCInfo info)
+        internal static void ReadDBC(DBCFile<T> dbcFile, BinaryReader reader)
         {
             if (reader is null)
                 return;
+
+            var info = DBCUtility.GetDBCInfo(reader);
 
             // Validate the DBC fields
             var fields = dbcFile.GetDBCType().GetFields();

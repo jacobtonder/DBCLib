@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 
 namespace DBCLib
@@ -33,6 +34,21 @@ namespace DBCLib
             }
 
             return fieldCount;
+        }
+
+        static public DBCInfo GetDBCInfo(BinaryReader reader)
+        {
+            if (reader is null)
+                throw new ArgumentNullException(nameof(reader), "Reader cannot be null.");
+
+            var info = new DBCInfo(
+                dbcRecords: reader.ReadUInt32(),
+                dbcFields: reader.ReadUInt32(),
+                recordSize: reader.ReadUInt32(),
+                stringSize: reader.ReadUInt32()
+            );
+
+            return info;
         }
     }
 }
