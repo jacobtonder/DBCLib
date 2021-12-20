@@ -36,7 +36,7 @@ namespace DBCLib
             return fieldCount;
         }
 
-        static public DBCInfo GetDBCInfo(BinaryReader reader)
+        internal static DBCInfo GetDBCInfo(BinaryReader reader)
         {
             if (reader is null)
                 throw new ArgumentNullException(nameof(reader), "Reader cannot be null.");
