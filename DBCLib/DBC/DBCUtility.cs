@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace DBCLib
 {
@@ -49,6 +51,30 @@ namespace DBCLib
             );
 
             return info;
+        }
+
+        internal static Dictionary<int, string> GetStringTable(BinaryReader reader, DBCInfo info, long headerSize)
+        {
+            if (reader is null)
+                throw new ArgumentNullException(nameof(reader), "Reader cannot be null.");
+
+            // DBC records can contain strings. These strings are not stored in the record but in an additional string block, at the end of the file.
+            // A record contains an offset into that block.
+            // These stings are zero terminated (read: c strings) and might be zero length.
+            reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
+            var stringData = reader.ReadBytes((int)info.StringSize);
+            string fullString = Encoding.UTF8.GetString(stringData);
+            var strings = fullString.Split(new[] { '\0' }, StringSplitOptions.None);
+
+            var stringTable = new Dictionary<int, string>();
+            var currentPosition = 0;
+            foreach (string str in strings)
+            {
+                stringTable.Add(currentPosition, str);
+                currentPosition += Encoding.UTF8.GetByteCount(str) + 1;
+            }
+
+            return stringTable;
         }
     }
 }

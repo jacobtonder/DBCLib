@@ -21,24 +21,11 @@ namespace DBCLib
             if (info.DBCFields != fieldCounts)
                 throw new InvalidDBCFields(dbcFile.GetDBCType().ToString());
 
-            // We don't need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
+            // We don't need to read the first bytes again (signature)
             long headerSize = reader.BaseStream.Position;
 
-            // Set position of reader to the position of the string table
-            reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
-
-            // Extract all strings and create string table
-            var stringData = reader.ReadBytes((int)info.StringSize);
-            string fullString = Encoding.UTF8.GetString(stringData);
-            var strings = fullString.Split(new[] { '\0' }, StringSplitOptions.None);
-
-            var stringTable = new Dictionary<int, string>();
-            var currentPosition = 0;
-            foreach (string str in strings)
-            {
-                stringTable.Add(currentPosition, str);
-                currentPosition += Encoding.UTF8.GetByteCount(str) + 1;
-            }
+            // Extract all strings and construct string table
+            var stringTable = DBCUtility.GetStringTable(reader, info, headerSize);
 
             // Reset position to base position
             reader.BaseStream.Position = headerSize;
