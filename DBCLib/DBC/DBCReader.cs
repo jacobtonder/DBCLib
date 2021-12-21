@@ -24,7 +24,7 @@ namespace DBCLib
             // We don't need to read the first bytes again (signature, dbcRecords, dbcFields, recordSize & stringSize)
             long headerSize = reader.BaseStream.Position;
 
-            // Set position of reader
+            // Set position of reader to the position of the string table
             reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
 
             // Extract all strings and create string table
