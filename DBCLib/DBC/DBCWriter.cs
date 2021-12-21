@@ -141,9 +141,8 @@ namespace DBCLib
         {
             str ??= "";
 
-            // Get the hash code of the string
+            // Check if the string already exists, if it exists, just return the position of the existing string.
             int hashCode = str.GetHashCode();
-
             if (stringHashes.TryGetValue(hashCode, out int position))
                 return position;
 
