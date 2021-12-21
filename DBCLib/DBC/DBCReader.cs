@@ -27,6 +27,7 @@ namespace DBCLib
             // Set position of reader
             reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
 
+            // Extract all strings and create string table
             var stringData = reader.ReadBytes((int)info.StringSize);
             string fullString = Encoding.UTF8.GetString(stringData);
             var strings = fullString.Split(new[] { '\0' }, StringSplitOptions.None);
@@ -161,7 +162,7 @@ namespace DBCLib
                     }
                 }
 
-                // Get the first value of the DBC file and use that as key for the DBC record
+                // Get the first value of the record and use that as the key for the DBC record
                 var firstValue = fields[0].GetValue(instance);
                 var key = (uint)Convert.ChangeType(firstValue, typeof(uint));
                 dbcFile.AddEntry(key, (T)instance);
