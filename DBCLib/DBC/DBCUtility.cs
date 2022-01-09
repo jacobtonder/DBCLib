@@ -58,13 +58,13 @@ namespace DBCLib
             if (reader is null)
                 throw new ArgumentNullException(nameof(reader), "Reader cannot be null.");
 
-            // DBC records can contain strings. These strings are not stored in the record but in an additional string block, at the end of the file.
-            // A record contains an offset into that block.
+            // DBC records can contain strings. These strings are not stored in the record but in an additional string block, at the end of the dbc file.
+            // A record contains an offset into that string block.
             // These stings are zero terminated (read: c strings) and might be zero length.
             reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
             var stringData = reader.ReadBytes((int)info.StringSize);
             string fullString = Encoding.UTF8.GetString(stringData);
-            var strings = fullString.Split(new[] { '\0' }, StringSplitOptions.None);
+            var strings = fullString.Split(new[] { '\0' });
 
             var stringTable = new Dictionary<int, string>();
             var currentPosition = 0;
