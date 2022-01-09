@@ -8,7 +8,7 @@
         public static readonly int Size = 17;
         public string String { get; set; }
 
-        public static implicit operator LocalizedString(string str) => new LocalizedString(str);
+        public static implicit operator LocalizedString(string str) => new(str);
         public static implicit operator string(LocalizedString str) => str.String;
     }
 }
