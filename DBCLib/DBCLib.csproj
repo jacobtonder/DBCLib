@@ -3,7 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Authors>Jacob Tønder</Authors>
-    <Copyright />
+    <Copyright>Copyright (c) Jacob Tønder 2023</Copyright>
+    <Title>DBCLib</Title>
+    <PackageProjectUrl>https://jacobtonder.dk/</PackageProjectUrl>
+    <Description>DBCLib is a .NET library intended to enable developers to modify DBC files with WDBC signature with ease.</Description>
+    <RepositoryUrl>https://github.com/jacobtonder/DBCLib</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>C#; DBCLib; DBC; .NET</PackageTags>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
