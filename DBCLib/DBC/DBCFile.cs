@@ -26,7 +26,7 @@ namespace DBCLib
         /// <param name="filePath">The file path to the DBC file.</param>
         /// <param name="dbcSignature">The signature of the DBC file.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public DBCFile(string filePath, string dbcSignature)
+        public DBCFile(string filePath, string dbcSignature = "WDBC")
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentNullException(nameof(filePath));
