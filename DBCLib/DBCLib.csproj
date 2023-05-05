@@ -9,10 +9,10 @@
     <Description>DBCLib is a .NET library intended to enable developers to modify DBC files with WDBC signature with ease.</Description>
     <RepositoryUrl>https://github.com/jacobtonder/DBCLib</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>C#; DBCLib; DBC; .NET</PackageTags>
+    <PackageTags>C#; DBCLib; DBC; .NET; WDBC; WOW</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<VersionPrefix>1.1.0</VersionPrefix>
+	<VersionPrefix>1.1.1</VersionPrefix>
   </PropertyGroup>
 
 </Project>
