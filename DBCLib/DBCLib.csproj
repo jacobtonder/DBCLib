@@ -11,6 +11,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>C#; DBCLib; DBC; .NET</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
 </Project>

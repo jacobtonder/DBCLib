@@ -2,18 +2,21 @@
 
 namespace DBCLib.Exceptions
 {
+    /// <summary>
+    /// Exception thrown when the signature of the specified DBC file does not match the signature of the specified DBC instance.
+    /// </summary>
     [Serializable]
     public class InvalidSignatureException : Exception
     {
-        public InvalidSignatureException()
+        internal InvalidSignatureException()
         {
         }
 
-        public InvalidSignatureException(string message) : base(message)
+        internal InvalidSignatureException(string message) : base(message)
         {
         }
 
-        public InvalidSignatureException(string message, Exception inner) : base(message, inner)
+        internal InvalidSignatureException(string message, Exception inner) : base(message, inner)
         {
         }
     }
