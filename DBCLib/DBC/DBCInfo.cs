@@ -1,6 +1,6 @@
 ﻿namespace DBCLib
 {
-    internal struct DBCInfo
+    internal readonly struct DBCInfo
     {
         public uint DBCRecords { get; }
         public uint DBCFields { get; }
