@@ -2,10 +2,10 @@
 {
     internal readonly struct DBCInfo
     {
-        public uint DBCRecords { get; }
-        public uint DBCFields { get; }
-        public uint RecordSize { get; }
-        public uint StringSize { get; }
+        public readonly uint DBCRecords { get; }
+        public readonly uint DBCFields { get; }
+        public readonly uint RecordSize { get; }
+        public readonly uint StringSize { get; }
 
         public DBCInfo(uint dbcRecords, uint dbcFields, uint recordSize, uint stringSize)
         {
