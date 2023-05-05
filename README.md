@@ -8,5 +8,9 @@ Features:
 * Save DBC files.
 * Load DBC files.
 
+## NuGet package
+
+https://www.nuget.org/packages/DBCLib
+
 ## Example (Winforms)
 See [DBC Editor](https://github.com/jacobtonder/DBCEditorExample/) for an example of how to use this library.
