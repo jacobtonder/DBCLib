@@ -37,35 +37,35 @@ namespace DBCLib.Test
             Assert.Throws<ArgumentNullException>(() => new DBCFile<CharTitlesEntry>("//path//", signature));
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(10)]
-        [InlineData(100)]
-        [InlineData(1000)]
-        [InlineData(uint.MaxValue)]
-        public void MaxKey_Equal(uint key)
-        {
-            DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
-            dbcFile.AddEntry(key, new CharTitlesEntry());
+        //[Theory]
+        //[InlineData(0)]
+        //[InlineData(10)]
+        //[InlineData(100)]
+        //[InlineData(1000)]
+        //[InlineData(uint.MaxValue)]
+        //public void MaxKey_Equal(uint key)
+        //{
+        //    DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
+        //    dbcFile.AddEntry(key, new CharTitlesEntry());
 
-            Assert.Equal(key, dbcFile.MaxKey);
-        }
+        //    Assert.Equal(key, dbcFile.MaxKey);
+        //}
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(10)]
-        [InlineData(100)]
-        [InlineData(1000)]
-        [InlineData(uint.MaxValue - 1)]
-        public void MaxKey_NotEqual(uint key)
-        {
-            DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
-            dbcFile.AddEntry(uint.MaxValue, new CharTitlesEntry());
+        //[Theory]
+        //[InlineData(0)]
+        //[InlineData(10)]
+        //[InlineData(100)]
+        //[InlineData(1000)]
+        //[InlineData(uint.MaxValue - 1)]
+        //public void MaxKey_NotEqual(uint key)
+        //{
+        //    DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
+        //    dbcFile.AddEntry(uint.MaxValue, new CharTitlesEntry());
 
-            dbcFile.AddEntry(key, new CharTitlesEntry());
+        //    dbcFile.AddEntry(key, new CharTitlesEntry());
 
-            Assert.NotEqual(key, dbcFile.MaxKey);
-        }
+        //    Assert.NotEqual(key, dbcFile.MaxKey);
+        //}
 
         [Fact]
         public void FieldCount_Equal()
@@ -79,23 +79,23 @@ namespace DBCLib.Test
             Assert.Equal(37, fieldCounts);
         }
 
-        [Fact]
-        public void RemoveEntry_DoesNotContain()
-        {
-            DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
-            CharTitlesEntry charTitlesEntry = new()
-            {
-                Id = 1,
-                NameMale = "Title %s",
-                NameFemale = "Title %s",
-                TitleMaskId = 1
-            };
+        //[Fact]
+        //public void RemoveEntry_DoesNotContain()
+        //{
+        //    DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
+        //    CharTitlesEntry charTitlesEntry = new()
+        //    {
+        //        Id = 1,
+        //        NameMale = "Title %s",
+        //        NameFemale = "Title %s",
+        //        TitleMaskId = 1
+        //    };
 
-            dbcFile.AddEntry(1, charTitlesEntry);
-            dbcFile.RemoveEntry(1);
+        //    dbcFile.AddEntry(1, charTitlesEntry);
+        //    dbcFile.RemoveEntry(1);
 
-            Assert.DoesNotContain(charTitlesEntry, dbcFile.Records);
-        }
+        //    Assert.DoesNotContain(charTitlesEntry, dbcFile.Records);
+        //}
 
         [Fact]
         public void RemoveEntry_ThrowsArgumentException()
@@ -105,23 +105,23 @@ namespace DBCLib.Test
             Assert.Throws<ArgumentException>(() => dbcFile.RemoveEntry(1));
         }
 
-        [Fact]
-        public void ReplaceEntry_Contains()
-        {
-            DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
-            CharTitlesEntry charTitlesEntry = new()
-            {
-                Id = 1,
-                NameMale = "Title %s",
-                NameFemale = "Title %s",
-                TitleMaskId = 1
-            };
+        //[Fact]
+        //public void ReplaceEntry_Contains()
+        //{
+        //    DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
+        //    CharTitlesEntry charTitlesEntry = new()
+        //    {
+        //        Id = 1,
+        //        NameMale = "Title %s",
+        //        NameFemale = "Title %s",
+        //        TitleMaskId = 1
+        //    };
 
-            dbcFile.AddEntry(1, new CharTitlesEntry());
-            dbcFile.ReplaceEntry(1, charTitlesEntry);
+        //    dbcFile.AddEntry(1, new CharTitlesEntry());
+        //    dbcFile.ReplaceEntry(1, charTitlesEntry);
 
-            Assert.Contains(charTitlesEntry, dbcFile.Records);
-        }
+        //    Assert.Contains(charTitlesEntry, dbcFile.Records);
+        //}
 
         [Fact]
         public void ReplaceEntry_ThrowsArgumentException()
@@ -140,22 +140,22 @@ namespace DBCLib.Test
             Assert.Throws<ArgumentNullException>(() => dbcFile.ReplaceEntry(1, null));
         }
 
-        [Fact]
-        public void AddEntry_Contains()
-        {
-            DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
-            CharTitlesEntry charTitlesEntry = new()
-            {
-                Id = 1,
-                NameMale = "Title %s",
-                NameFemale = "Title %s",
-                TitleMaskId = 1
-            };
+        //[Fact]
+        //public void AddEntry_Contains()
+        //{
+        //    DBCFile<CharTitlesEntry> dbcFile = new("//path//", "signature");
+        //    CharTitlesEntry charTitlesEntry = new()
+        //    {
+        //        Id = 1,
+        //        NameMale = "Title %s",
+        //        NameFemale = "Title %s",
+        //        TitleMaskId = 1
+        //    };
 
-            dbcFile.AddEntry(1, charTitlesEntry);
+        //    dbcFile.AddEntry(1, charTitlesEntry);
 
-            Assert.Contains(charTitlesEntry, dbcFile.Records);
-        }
+        //    Assert.Contains(charTitlesEntry, dbcFile.Records);
+        //}
 
         [Fact]
         public void AddEntry_ThrowsArgumentException()

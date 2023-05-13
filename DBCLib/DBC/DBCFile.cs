@@ -42,13 +42,13 @@ namespace DBCLib
         }
 
         /// <summary>
-        /// Dictionary of the records in the loaded DBC file.
+        /// Dictionary of the records in the loaded DBC file. If the DBC file is not loaded, an exception will be thrown.
         /// </summary>
-        public Dictionary<uint, T>.ValueCollection Records => records.Values;
+        public Dictionary<uint, T>.ValueCollection Records => isLoaded ? records.Values : throw new DBCFileNotLoadedException();
         /// <summary>
-        /// The Max Key of all the records in the loaded DBC file.
+        /// The Max Key of all the records in the loaded DBC file. If the DBC file is not loaded, an exception will be thrown.
         /// </summary>
-        public uint MaxKey => records.Keys.Max();
+        public uint MaxKey => isLoaded ? records.Keys.Max() : throw new DBCFileNotLoadedException();
 
         internal Type GetDBCType() => dbcType;
         internal uint LocalFlag { get; set; }

@@ -19,7 +19,7 @@ namespace DBCLib
             var fields = dbcFile.GetDBCType().GetFields();
             int fieldCounts = DBCUtility.FieldCount(fields, dbcFile.GetDBCType());
             if (info.DBCFields != fieldCounts)
-                throw new InvalidDBCFields(dbcFile.GetDBCType().ToString());
+                throw new InvalidDBCFieldsException(dbcFile.GetDBCType().ToString());
 
             // We don't need to read the first bytes again (signature)
             long headerSize = reader.BaseStream.Position;

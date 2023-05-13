@@ -12,7 +12,7 @@
     <PackageTags>C#; DBCLib; DBC; .NET; WDBC; WOW</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<VersionPrefix>1.1.1</VersionPrefix>
+	<VersionPrefix>1.1.2</VersionPrefix>
   </PropertyGroup>
 
 </Project>

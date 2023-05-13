@@ -6,17 +6,17 @@ namespace DBCLib.Exceptions
     /// Exception thrown when the field count of the specified DBC file does not match the field count of the specified DBC type.
     /// </summary>
     [Serializable]
-    public class InvalidDBCFields : Exception
+    public class InvalidDBCFieldsException : Exception
     {
-        internal InvalidDBCFields()
+        internal InvalidDBCFieldsException()
         {
         }
 
-        internal InvalidDBCFields(string message) : base(message)
+        internal InvalidDBCFieldsException(string message) : base(message)
         {
         }
 
-        internal InvalidDBCFields(string message, Exception innerException) : base(message, innerException)
+        internal InvalidDBCFieldsException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
