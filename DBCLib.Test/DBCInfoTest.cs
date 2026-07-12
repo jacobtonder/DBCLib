@@ -4,36 +4,18 @@ namespace DBCLib.Test
 {
     public class DBCInfoTest
     {
-        [Fact]
-        public void DBCRecords_Equal()
+        [Theory]
+        [InlineData((uint)0, (uint)1, (uint)2, (uint)3)]
+        [InlineData((uint)10, (uint)20, (uint)30, (uint)40)]
+        [InlineData(uint.MaxValue, (uint)0, (uint)148, (uint)1)]
+        public void Constructor_AssignsAllProperties(uint dbcRecords, uint dbcFields, uint recordSize, uint stringSize)
         {
-            DBCInfo dbcInfo = new(0, 1, 2, 3);
+            DBCInfo dbcInfo = new(dbcRecords, dbcFields, recordSize, stringSize);
 
-            Assert.Equal((uint)0, dbcInfo.DBCRecords);
-        }
-
-        [Fact]
-        public void DBCFields_Equal()
-        {
-            DBCInfo dbcInfo = new(0, 1, 2, 3);
-
-            Assert.Equal((uint)1, dbcInfo.DBCFields);
-        }
-
-        [Fact]
-        public void RecordSize_Equal()
-        {
-            DBCInfo dbcInfo = new(0, 1, 2, 3);
-
-            Assert.Equal((uint)2, dbcInfo.RecordSize);
-        }
-
-        [Fact]
-        public void StringSize_Equal()
-        {
-            DBCInfo dbcInfo = new(0, 1, 2, 3);
-
-            Assert.Equal((uint)3, dbcInfo.StringSize);
+            Assert.Equal(dbcRecords, dbcInfo.DBCRecords);
+            Assert.Equal(dbcFields, dbcInfo.DBCFields);
+            Assert.Equal(recordSize, dbcInfo.RecordSize);
+            Assert.Equal(stringSize, dbcInfo.StringSize);
         }
     }
 }
