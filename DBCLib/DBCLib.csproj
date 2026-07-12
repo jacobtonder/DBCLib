@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Authors>Jacob Tønder</Authors>
-    <Copyright>Copyright (c) Jacob Tønder 2023</Copyright>
+    <Copyright>Copyright (c) Jacob Tønder 2026</Copyright>
     <Title>DBCLib</Title>
     <PackageProjectUrl>https://jacobtonder.dk/</PackageProjectUrl>
     <Description>DBCLib is a .NET library intended to enable developers to modify DBC files with WDBC signature with ease.</Description>

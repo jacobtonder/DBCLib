@@ -63,16 +63,30 @@ namespace DBCLib
             // These stings are zero terminated (read: c strings) and might be zero length.
             reader.BaseStream.Position = info.DBCRecords * info.RecordSize + headerSize;
             var stringData = reader.ReadBytes((int)info.StringSize);
-            string fullString = Encoding.UTF8.GetString(stringData);
-            var strings = fullString.Split(new[] { '\0' });
-
             var stringTable = new Dictionary<int, string>();
-            var currentPosition = 0;
-            foreach (string str in strings)
+            if (stringData.Length == 0)
             {
-                stringTable.Add(currentPosition, str);
-                currentPosition += Encoding.UTF8.GetByteCount(str) + 1;
+                stringTable.Add(0, string.Empty);
+                return stringTable;
             }
+
+            var start = 0;
+            for (var i = 0; i < stringData.Length; ++i)
+            {
+                if (stringData[i] != 0)
+                    continue;
+
+                var length = i - start;
+                string value = length == 0 ? string.Empty : Encoding.UTF8.GetString(stringData, start, length);
+                stringTable[start] = value;
+                start = i + 1;
+            }
+
+            if (start < stringData.Length)
+                stringTable[start] = Encoding.UTF8.GetString(stringData, start, stringData.Length - start);
+
+            if (!stringTable.ContainsKey(0))
+                stringTable.Add(0, string.Empty);
 
             return stringTable;
         }

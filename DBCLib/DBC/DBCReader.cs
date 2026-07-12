@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using DBCLib.Exceptions;
 
@@ -8,18 +9,21 @@ namespace DBCLib
 {
     internal static class DBCReader<T> where T : class, new()
     {
+        private static readonly Type DbcType = typeof(T);
+        private static readonly FieldInfo[] Fields = DbcType.GetFields();
+        private static readonly ReaderFieldMetadata[] FieldMetadata = CreateFieldMetadata(Fields);
+        private static readonly int ExpectedFieldCount = DBCUtility.FieldCount(Fields, DbcType);
+
         internal static void ReadDBC(DBCFile<T> dbcFile, BinaryReader reader)
         {
             if (reader is null)
-                return;
+                throw new ArgumentNullException(nameof(reader));
 
             var info = DBCUtility.GetDBCInfo(reader);
 
             // Validate the DBC fields
-            var fields = dbcFile.GetDBCType().GetFields();
-            int fieldCounts = DBCUtility.FieldCount(fields, dbcFile.GetDBCType());
-            if (info.DBCFields != fieldCounts)
-                throw new InvalidDBCFieldsException(dbcFile.GetDBCType().ToString());
+            if (info.DBCFields != ExpectedFieldCount)
+                throw new InvalidDBCFieldsException(DbcType.ToString());
 
             // We don't need to read the first bytes again (signature)
             long headerSize = reader.BaseStream.Position;
@@ -33,15 +37,15 @@ namespace DBCLib
             // Loop through all of the records in the DBC file
             for (uint i = 0; i < info.DBCRecords; ++i)
             {
-                var instance = Activator.CreateInstance(dbcFile.GetDBCType());
+                var instance = new T();
 
-                foreach (var field in fields)
+                foreach (var metadata in FieldMetadata)
                 {
-                    switch (Type.GetTypeCode(field.FieldType))
+                    switch (metadata.TypeCode)
                     {
                         case TypeCode.Object:
                         {
-                            if (field.FieldType == typeof(LocalizedString))
+                            if (metadata.IsLocalizedString)
                             {
                                 var value = "";
                                 for (uint j = 0; j < LocalizedString.Size - 1; ++j)
@@ -56,79 +60,44 @@ namespace DBCLib
 
                                 dbcFile.LocalFlag = reader.ReadUInt32();
 
-                                field.SetValue(instance, (LocalizedString)value);
+                                metadata.Field.SetValue(instance, (LocalizedString)value);
                             }
-                            else if (field.FieldType.IsArray)
+                            else if (metadata.IsArray)
                             {
-                                Array array;
-                                int arrayLength;
-
-                                switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                                Array array = metadata.ElementTypeCode switch
                                 {
-                                    case TypeCode.Int32:
-                                        // Get length of array
-                                        arrayLength = ((int[])field.GetValue(instance)).Length;
+                                    TypeCode.Int32 => ReadInt32Array(reader, metadata.ArrayLength),
+                                    TypeCode.UInt32 => ReadUInt32Array(reader, metadata.ArrayLength),
+                                    TypeCode.Single => ReadSingleArray(reader, metadata.ArrayLength),
+                                    _ => throw new NotImplementedException(metadata.ElementTypeCode.ToString())
+                                };
 
-                                        // Set Array
-                                        array = new int[arrayLength];
-
-                                        // Set Value of DBC object by looping through the array
-                                        for (var j = 0; j < arrayLength; ++j)
-                                            array.SetValue(reader.ReadInt32(), j);
-                                        field.SetValue(instance, array);
-                                        break;
-                                    case TypeCode.UInt32:
-                                        // Get length of array
-                                        arrayLength = ((uint[])field.GetValue(instance)).Length;
-
-                                        // Set Array
-                                        array = new uint[arrayLength];
-
-                                        // Set Value of DBC object by looping through the array
-                                        for (var j = 0; j < arrayLength; ++j)
-                                            array.SetValue(reader.ReadUInt32(), j);
-                                        field.SetValue(instance, array);
-                                        break;
-                                    case TypeCode.Single:
-                                        // Get length of array
-                                        arrayLength = ((float[])field.GetValue(instance)).Length;
-
-                                        // Set Array
-                                        array = new float[arrayLength];
-
-                                        // Set Value of DBC object by looping through the array
-                                        for (var j = 0; j < arrayLength; ++j)
-                                            array.SetValue(reader.ReadSingle(), j);
-                                        field.SetValue(instance, array);
-                                        break;
-                                    default:
-                                        throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
-                                }
+                                metadata.Field.SetValue(instance, array);
                             }
                             break;
                         }
                         case TypeCode.Byte:
                         {
                             byte value = reader.ReadByte();
-                            field.SetValue(instance, value);
+                            metadata.Field.SetValue(instance, value);
                             break;
                         }
                         case TypeCode.Int32:
                         {
                             int value = reader.ReadInt32();
-                            field.SetValue(instance, value);
+                            metadata.Field.SetValue(instance, value);
                             break;
                         }
                         case TypeCode.UInt32:
                         {
                             uint value = reader.ReadUInt32();
-                            field.SetValue(instance, value);
+                            metadata.Field.SetValue(instance, value);
                             break;
                         }
                         case TypeCode.Single:
                         {
                             float value = reader.ReadSingle();
-                            field.SetValue(instance, value);
+                            metadata.Field.SetValue(instance, value);
                             break;
                         }
                         case TypeCode.String:
@@ -141,19 +110,87 @@ namespace DBCLib
                                 throw new KeyNotFoundException(offsetKey.ToString());
 
                             string value = stringFromTable;
-                            field.SetValue(instance, value);
+                            metadata.Field.SetValue(instance, value);
                             break;
                         }
                         default:
-                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
+                            throw new NotImplementedException(metadata.TypeCode.ToString());
                     }
                 }
 
                 // Get the first value of the record and use that as the key for the DBC record
-                var firstValue = fields[0].GetValue(instance);
+                var firstValue = Fields[0].GetValue(instance);
                 var key = (uint)Convert.ChangeType(firstValue, typeof(uint));
-                dbcFile.AddEntry(key, (T)instance);
+                dbcFile.AddLoadedEntry(key, instance);
             }
+        }
+
+        private static ReaderFieldMetadata[] CreateFieldMetadata(FieldInfo[] fields)
+        {
+            var template = new T();
+            var metadata = new ReaderFieldMetadata[fields.Length];
+            for (var i = 0; i < fields.Length; ++i)
+            {
+                var field = fields[i];
+                var typeCode = Type.GetTypeCode(field.FieldType);
+                var isArray = field.FieldType.IsArray;
+                var elementTypeCode = isArray ? Type.GetTypeCode(field.FieldType.GetElementType()) : default;
+                var arrayLength = isArray ? ((Array)field.GetValue(template)).Length : 0;
+
+                metadata[i] = new ReaderFieldMetadata(
+                    field,
+                    typeCode,
+                    field.FieldType == typeof(LocalizedString),
+                    isArray,
+                    elementTypeCode,
+                    arrayLength);
+            }
+
+            return metadata;
+        }
+
+        private static int[] ReadInt32Array(BinaryReader reader, int length)
+        {
+            var array = new int[length];
+            for (var i = 0; i < length; ++i)
+                array[i] = reader.ReadInt32();
+            return array;
+        }
+
+        private static uint[] ReadUInt32Array(BinaryReader reader, int length)
+        {
+            var array = new uint[length];
+            for (var i = 0; i < length; ++i)
+                array[i] = reader.ReadUInt32();
+            return array;
+        }
+
+        private static float[] ReadSingleArray(BinaryReader reader, int length)
+        {
+            var array = new float[length];
+            for (var i = 0; i < length; ++i)
+                array[i] = reader.ReadSingle();
+            return array;
+        }
+
+        private readonly struct ReaderFieldMetadata
+        {
+            internal ReaderFieldMetadata(FieldInfo field, TypeCode typeCode, bool isLocalizedString, bool isArray, TypeCode elementTypeCode, int arrayLength)
+            {
+                Field = field;
+                TypeCode = typeCode;
+                IsLocalizedString = isLocalizedString;
+                IsArray = isArray;
+                ElementTypeCode = elementTypeCode;
+                ArrayLength = arrayLength;
+            }
+
+            internal FieldInfo Field { get; }
+            internal TypeCode TypeCode { get; }
+            internal bool IsLocalizedString { get; }
+            internal bool IsArray { get; }
+            internal TypeCode ElementTypeCode { get; }
+            internal int ArrayLength { get; }
         }
     }
 }

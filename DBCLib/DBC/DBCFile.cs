@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using DBCLib.Exceptions;
 
@@ -19,6 +18,8 @@ namespace DBCLib
         private readonly string dbcSignature;
         private bool isEdited;
         private bool isLoaded;
+        private uint maxKey;
+        private bool hasRecords;
 
         /// <summary>
         /// Initialize the DBCFile class with file path and DBC signature.
@@ -39,6 +40,8 @@ namespace DBCLib
             dbcType = typeof(T);
             isEdited = false;
             isLoaded = false;
+            maxKey = 0;
+            hasRecords = false;
         }
 
         /// <summary>
@@ -48,7 +51,19 @@ namespace DBCLib
         /// <summary>
         /// The Max Key of all the records in the loaded DBC file. If the DBC file is not loaded, an exception will be thrown.
         /// </summary>
-        public uint MaxKey => isLoaded ? records.Keys.Max() : throw new DBCFileNotLoadedException();
+        public uint MaxKey
+        {
+            get
+            {
+                if (!isLoaded)
+                    throw new DBCFileNotLoadedException();
+
+                if (!hasRecords)
+                    throw new InvalidOperationException("Sequence contains no elements");
+
+                return maxKey;
+            }
+        }
 
         internal Type GetDBCType() => dbcType;
         internal uint LocalFlag { get; set; }
@@ -100,8 +115,18 @@ namespace DBCLib
                 throw new ArgumentException("The DBC File already contains the entry.", nameof(key));
 
             records[key] = value ?? throw new ArgumentNullException(nameof(value));
+            UpdateMaxKeyOnAdd(key);
 
             isEdited = true;
+        }
+
+        internal void AddLoadedEntry(uint key, T value)
+        {
+            if (records.ContainsKey(key))
+                throw new ArgumentException("The DBC File already contains the entry.", nameof(key));
+
+            records[key] = value ?? throw new ArgumentNullException(nameof(value));
+            UpdateMaxKeyOnAdd(key);
         }
 
         /// <summary>
@@ -115,6 +140,7 @@ namespace DBCLib
                 throw new ArgumentException("The DBC File does not contain the entry.", nameof(key));
 
             records.Remove(key);
+            UpdateMaxKeyOnRemove(key);
 
             isEdited = true;
         }
@@ -146,6 +172,36 @@ namespace DBCLib
 
             // Read the DBC File
             DBCReader<T>.ReadDBC(this, reader);
+        }
+
+        private void UpdateMaxKeyOnAdd(uint key)
+        {
+            if (!hasRecords || key > maxKey)
+                maxKey = key;
+
+            hasRecords = true;
+        }
+
+        private void UpdateMaxKeyOnRemove(uint key)
+        {
+            if (records.Count == 0)
+            {
+                hasRecords = false;
+                maxKey = 0;
+                return;
+            }
+
+            if (key != maxKey)
+                return;
+
+            uint nextMax = 0;
+            foreach (var recordKey in records.Keys)
+            {
+                if (recordKey > nextMax)
+                    nextMax = recordKey;
+            }
+
+            maxKey = nextMax;
         }
     }
 }

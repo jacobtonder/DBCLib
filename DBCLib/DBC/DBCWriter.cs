@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace DBCLib
 {
     internal class DBCWriter<T> where T : class, new()
     {
-        private readonly Dictionary<int, int> stringHashes = new Dictionary<int, int>();
+        private static readonly Type DbcType = typeof(T);
+        private static readonly FieldInfo[] Fields = DbcType.GetFields();
+        private static readonly WriterFieldMetadata[] FieldMetadata = CreateFieldMetadata(Fields);
+
+        private readonly Dictionary<string, int> stringPositions = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<int, string> stringTable = new Dictionary<int, string>();
         private KeyValuePair<int, string> lastItem;
 
         internal void WriteDBC(DBCFile<T> dbcFile, string path, string signature)
         {
-            using var fileStream = File.OpenWrite(path);
+            using var fileStream = File.Create(path);
             using var writer = new BinaryWriter(fileStream);
             // Sign the file with the signature
             var signatureBytes = Encoding.UTF8.GetBytes(signature);
@@ -22,9 +26,7 @@ namespace DBCLib
             writer.Write(dbcFile.Records.Count);
 
             // Get fields of the DBC type and write to the DBC file
-            var dbcType = dbcFile.GetDBCType();
-            var fields = dbcType.GetFields();
-            int fieldCount = DBCUtility.FieldCount(fields, dbcType);
+            int fieldCount = DBCUtility.FieldCount(Fields, DbcType);
             writer.Write(fieldCount);
             writer.Write(fieldCount * 4);
             writer.Write(0);
@@ -35,15 +37,15 @@ namespace DBCLib
 
             foreach (var record in dbcFile.Records)
             {
-                foreach (var field in fields)
+                foreach (var metadata in FieldMetadata)
                 {
-                    switch (Type.GetTypeCode(field.FieldType))
+                    switch (metadata.TypeCode)
                     {
                         case TypeCode.Object:
                             {
-                                if (field.FieldType == typeof(LocalizedString))
+                                if (metadata.IsLocalizedString)
                                 {
-                                    int position = AddStringToDictionary((LocalizedString)field.GetValue(record));
+                                    int position = AddStringToDictionary((LocalizedString)metadata.Field.GetValue(record));
 
                                     // Local strings before the local position
                                     for (uint i = 0; i < dbcFile.LocalPosition; ++i)
@@ -63,11 +65,11 @@ namespace DBCLib
                                 }
                                 else
                                 {
-                                    if (field.GetValue(record) is Array array)
+                                    if (metadata.Field.GetValue(record) is Array array)
                                     {
                                         int arrayLength = array.Length;
 
-                                        switch (Type.GetTypeCode(field.FieldType.GetElementType()))
+                                        switch (metadata.ElementTypeCode)
                                         {
                                             case TypeCode.Int32:
                                                 for (var i = 0; i < arrayLength; ++i)
@@ -82,7 +84,7 @@ namespace DBCLib
                                                     writer.Write((float)array.GetValue(i));
                                                 break;
                                             default:
-                                                throw new NotImplementedException(Type.GetTypeCode(field.FieldType.GetElementType()).ToString());
+                                                throw new NotImplementedException(metadata.ElementTypeCode.ToString());
                                         }
                                     }
                                 }
@@ -90,43 +92,44 @@ namespace DBCLib
                             }
                         case TypeCode.Byte:
                             {
-                                var value = (byte)field.GetValue(record);
+                                var value = (byte)metadata.Field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                         case TypeCode.Int32:
                             {
-                                var value = (int)field.GetValue(record);
+                                var value = (int)metadata.Field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                         case TypeCode.UInt32:
                             {
-                                var value = (uint)field.GetValue(record);
+                                var value = (uint)metadata.Field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                         case TypeCode.String:
                             {
-                                var str = field.GetValue(record) as string;
+                                var str = metadata.Field.GetValue(record) as string;
                                 writer.Write(AddStringToDictionary(str));
                                 break;
                             }
                         case TypeCode.Single:
                             {
-                                var value = (float)field.GetValue(record);
+                                var value = (float)metadata.Field.GetValue(record);
                                 writer.Write(value);
                                 break;
                             }
                         default:
-                            throw new NotImplementedException(Type.GetTypeCode(field.FieldType).ToString());
+                            throw new NotImplementedException(metadata.TypeCode.ToString());
                     }
                 }
             }
 
             // Write all of the strings to the DBC file
-            foreach (var stringTableBytes in stringTable.Values.Select(str => Encoding.UTF8.GetBytes(str)))
+            foreach (var str in stringTable.Values)
             {
+                var stringTableBytes = Encoding.UTF8.GetBytes(str);
                 writer.Write(stringTableBytes);
                 writer.Write((byte)0);
             }
@@ -134,16 +137,15 @@ namespace DBCLib
             // TODO: Allow for dynamic header size
             writer.BaseStream.Position = 16;
             if (stringTable.Count > 0)
-                writer.Write(stringTable.Last().Key + Encoding.UTF8.GetByteCount(stringTable.Last().Value) + 1);
+                writer.Write(lastItem.Key + Encoding.UTF8.GetByteCount(lastItem.Value) + 1);
         }
 
         private int AddStringToDictionary(string str)
         {
-            str ??= "";
+            str ??= string.Empty;
 
-            // Check if the string already exists, if it exists, just return the position of the existing string.
-            int hashCode = str.GetHashCode();
-            if (stringHashes.TryGetValue(hashCode, out int position))
+            // Reuse the same offset for duplicate strings.
+            if (stringPositions.TryGetValue(str, out int position))
                 return position;
 
             if (stringTable.Count > 0)
@@ -151,10 +153,41 @@ namespace DBCLib
 
             // Add the values to the dictionaries
             stringTable.Add(position, str);
-            stringHashes.Add(hashCode, position);
+            stringPositions.Add(str, position);
             lastItem = new KeyValuePair<int, string>(position, str);
 
             return position;
+        }
+
+        private static WriterFieldMetadata[] CreateFieldMetadata(FieldInfo[] fields)
+        {
+            var metadata = new WriterFieldMetadata[fields.Length];
+            for (var i = 0; i < fields.Length; ++i)
+            {
+                var field = fields[i];
+                var typeCode = Type.GetTypeCode(field.FieldType);
+                var isLocalizedString = field.FieldType == typeof(LocalizedString);
+                var elementTypeCode = field.FieldType.IsArray ? Type.GetTypeCode(field.FieldType.GetElementType()) : default;
+                metadata[i] = new WriterFieldMetadata(field, typeCode, isLocalizedString, elementTypeCode);
+            }
+
+            return metadata;
+        }
+
+        private readonly struct WriterFieldMetadata
+        {
+            internal WriterFieldMetadata(FieldInfo field, TypeCode typeCode, bool isLocalizedString, TypeCode elementTypeCode)
+            {
+                Field = field;
+                TypeCode = typeCode;
+                IsLocalizedString = isLocalizedString;
+                ElementTypeCode = elementTypeCode;
+            }
+
+            internal FieldInfo Field { get; }
+            internal TypeCode TypeCode { get; }
+            internal bool IsLocalizedString { get; }
+            internal TypeCode ElementTypeCode { get; }
         }
     }
 }
